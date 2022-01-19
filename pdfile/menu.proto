@@ -1,0 +1,26 @@
+syntax = "proto3";
+
+option go_package = "./;rpc_service";
+
+package rpc_service;
+
+message MenuRequest{
+  string MenuIds = 1;
+}
+
+
+message MenuResponse{
+  int32 id = 1;
+  string MenuName = 2;
+  string MenuPath = 3;
+  string Remark = 4;
+  int32 MenuType = 5;
+}
+
+message MenuListResponse{
+  repeated MenuResponse menuList = 1;
+}
+
+service MenuService {
+  rpc GetMenuByIds(MenuRequest) returns (MenuListResponse);
+}

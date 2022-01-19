@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "./;rpc_service";
+
+package rpc_service;
+
+message UserRoleMenuRequest{
+  string UserIds = 1;
+}
+
+
+message UserRoleMenuResponse{
+  int32 id = 1;
+  string MenuName = 2;
+  string MenuPath = 3;
+  int32 MenuType = 5;
+}
+
+message UserRoleMenuListResponse{
+  repeated UserRoleMenuResponse menuList = 1;
+}
+
+service UserRoleMenuService {
+  rpc GetRoleMenuByUserIds(UserRoleMenuRequest) returns (UserRoleMenuListResponse);
+}
