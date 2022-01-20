@@ -24,7 +24,7 @@ import (
 */
 func initExtend() {
 	path := gin_util.GetPath()
-	gin_config.InitConfig(path+"/app/user/user_config/", "go_project")
+	gin_config.InitConfig(path+"/app/user/user_config/", "go_user")
 	gin_logger.InitServerLogger(path)
 	gin_logger.InitRecoveryLogger(path)
 	gin_redis.InitRedis()

@@ -15,7 +15,7 @@ import (
 	grpc_ctxtags "github.com/grpc-ecosystem/go-grpc-middleware/tags"
 	grpc_opentracing "github.com/grpc-ecosystem/go-grpc-middleware/tracing/opentracing"
 	"go.uber.org/zap"
-	"go_project/app/user/user_rpc"
+	"go_project/app/role/role_rpc"
 	service "go_project/rpc_service"
 	"google.golang.org/grpc"
 	"net"
@@ -23,7 +23,7 @@ import (
 
 func initExtend() {
 	path := gin_util.GetPath()
-	gin_config.InitConfig(path+"/app/user/user_config/", "go_user_rpc")
+	gin_config.InitConfig(path+"/app/role/role_config/", "go_role_rpc")
 	gin_logger.InitServerLogger(path)
 	gin_logger.InitRecoveryLogger(path)
 	gin_redis.InitRedis()
@@ -34,7 +34,7 @@ func initExtend() {
 
 func createRpc() *grpc.Server {
 	initExtend()
-	userService := user_rpc.GetUserRpcService()
+	roleService := role_rpc.GetRoleRpcService()
 	gRpcService := grpc.NewServer(
 		grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
 			grpc_recovery.UnaryServerInterceptor(),
@@ -42,7 +42,7 @@ func createRpc() *grpc.Server {
 			grpc_opentracing.UnaryServerInterceptor(),
 			grpc_zap.UnaryServerInterceptor(zap.L()),
 		)))
-	service.RegisterUserServiceServer(gRpcService, &userService)
+	service.RegisterUserRoleMenuServiceServer(gRpcService, &roleService)
 	return gRpcService
 }
 
