@@ -27,7 +27,7 @@ func initExtend() {
 	gin_logger.InitServerLogger(path)
 	gin_logger.InitRecoveryLogger(path)
 	gin_redis.InitRedis()
-	gin_mysql.InitMysqlV2Map()
+	gin_mysql.InitMysqlMap()
 	gin_jaeger.InitJaegerTracer()
 	gin_translator.InitTranslator()
 }
@@ -48,7 +48,7 @@ func createRpc() *grpc.Server {
 
 func main() {
 	gRpcService := createRpc()
-	defer gin_mysql.CloseMysqlPool()
+	defer gin_mysql.CloseMysqlConnect()
 	defer gin_jaeger.IoCloser()
 	defer gin_redis.CloseRedisPool()
 	defer gRpcService.GracefulStop()

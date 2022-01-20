@@ -26,7 +26,7 @@ type AccountDao struct {
 
 func GetAccountDao() AccountDao {
 	return AccountDao{
-		dbMap: gin_mysql.GetMysqlV2Map(),
+		dbMap: gin_mysql.GetMysqlMap(),
 	}
 }
 
@@ -43,7 +43,7 @@ func (d AccountDao) GetAccountListDaoByParamDao(param account_param.GetAccountRe
 }
 
 func (d AccountDao) PostSendCodeDaoByParamDao(param account_param.PostAccountRequestParam) (error, string) {
-	err := gin_mysql.UseMysqlV2(d.dbMap).Transaction(func(tx *gorm.DB) error {
+	err := gin_mysql.UseMysql(d.dbMap).Transaction(func(tx *gorm.DB) error {
 		account := account_model.Account{
 			Mobile:           param.Mobile,
 			RegisterPlatform: param.RegisterPlatform,

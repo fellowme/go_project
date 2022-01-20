@@ -6,7 +6,7 @@ import (
 )
 
 type User struct {
-	gin_model.BaseMysqlStructV2
+	gin_model.BaseMysqlStruct
 	AccountId  int    `gorm:"comment:账号id" json:"account_id"`
 	UserName   string `gorm:"type:varchar(50);comment:用户名称" json:"user_name,omitempty"`
 	NickName   string `gorm:"type:varchar(50);comment:用户昵称" json:"nick_name,omitempty"`

@@ -34,7 +34,7 @@ type RoleDao struct {
 
 func GetRoleDao() RoleDao {
 	return RoleDao{
-		dbMap: gin_mysql.GetMysqlV2Map(),
+		dbMap: gin_mysql.GetMysqlMap(),
 	}
 }
 

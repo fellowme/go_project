@@ -23,7 +23,7 @@ type MenuDao struct {
 
 func GetMenuDao() MenuDao {
 	return MenuDao{
-		dbMap: gin_mysql.GetMysqlV2Map(),
+		dbMap: gin_mysql.GetMysqlMap(),
 	}
 }
 

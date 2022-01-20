@@ -28,7 +28,7 @@ func initExtend() {
 	gin_logger.InitServerLogger(path)
 	gin_logger.InitRecoveryLogger(path)
 	gin_redis.InitRedis()
-	gin_mysql.InitMysqlV2Map()
+	gin_mysql.InitMysqlMap()
 	gin_jaeger.InitJaegerTracer()
 	gin_translator.InitTranslator()
 }
@@ -54,7 +54,7 @@ func creatApp() *gin.Engine {
 	初始化mysql 表信息
 */
 func initTable() {
-	err := gin_mysql.UseMysqlV2(nil).AutoMigrate(account_model.Account{}, account_model.VerificationEmailCode{}, account_model.VerificationMobileCode{}, account_model.LoginTime{})
+	err := gin_mysql.UseMysql(nil).AutoMigrate(account_model.Account{}, account_model.VerificationEmailCode{}, account_model.VerificationMobileCode{}, account_model.LoginTime{})
 	if err != nil {
 		zap.L().Error("account AutoMigrate error", zap.Any("error", err))
 	}
@@ -68,7 +68,7 @@ func main() {
 		gin.SetMode(gin.ReleaseMode)
 	}
 	app := creatApp()
-	defer gin_mysql.CloseMysqlPool()
+	defer gin_mysql.CloseMysqlConnect()
 	defer gin_jaeger.IoCloser()
 	initTable()
 	endless.DefaultReadTimeOut = time.Duration(gin_config.ServerConfigSettings.Server.ReadTimeout) * time.Second

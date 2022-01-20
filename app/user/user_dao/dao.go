@@ -25,7 +25,7 @@ type UserDao struct {
 
 func GetUserDao() *UserDao {
 	return &UserDao{
-		dbMap: gin_mysql.GetMysqlV2Map(),
+		dbMap: gin_mysql.GetMysqlMap(),
 	}
 }
 
