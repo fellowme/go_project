@@ -5,6 +5,7 @@ echo "current directory are: $base_path"
 app_mod="menu"
 
 cd $base_path"/app"
+
 mkdir $app_mod
 
 cd $app_mod
