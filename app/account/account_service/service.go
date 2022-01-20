@@ -3,6 +3,9 @@ package account_service
 import (
 	"context"
 	"errors"
+	"github.com/dgrijalva/jwt-go"
+	gin_const "github.com/fellowme/gin_common_library/const"
+	gin_jwt "github.com/fellowme/gin_common_library/jwt"
 	gin_model "github.com/fellowme/gin_common_library/model"
 	gin_util "github.com/fellowme/gin_common_library/util"
 	"go_project/app/account/account_cache"
@@ -18,7 +21,7 @@ import (
 type AccountServiceInterface interface {
 	GetAccountListServiceByParam(param account_param.GetAccountRequestParam) (account_param.GetAccountListResponse, error)
 	PostSendCodeServiceByParam(param account_param.PostAccountRequestParam) error
-	PostVerificationCodeServiceByParam(ctx context.Context, param account_param.PostPostVerificationCodeRequestParam) error
+	PostVerificationCodeServiceByParam(ctx context.Context, param account_param.PostPostVerificationCodeRequestParam) (string, error)
 	PostLoginOutServiceByParam(ctx context.Context, param account_param.PostLoginOutRequestParam) error
 	PostLoginServiceByParam(ctx context.Context, param account_param.PostLoginRequestParam) error
 }
@@ -65,25 +68,25 @@ func (receiver AccountService) PostSendCodeServiceByParam(param account_param.Po
 	return nil
 }
 
-func (receiver AccountService) PostVerificationCodeServiceByParam(ctx context.Context, param account_param.PostPostVerificationCodeRequestParam) error {
+func (receiver AccountService) PostVerificationCodeServiceByParam(ctx context.Context, param account_param.PostPostVerificationCodeRequestParam) (string, error) {
 	code := account_cache.GetPhoneRedisKeyCache(param.Mobile)
 	if code == "" {
-		return errors.New(account_const.VerificationCodeExpireTimeOutTip)
+		return "", errors.New(account_const.VerificationCodeExpireTimeOutTip)
 	}
 	if code != param.VerificationMobileCode {
-		return errors.New(account_const.VerificationCodeErrorTip)
+		return "", errors.New(account_const.VerificationCodeErrorTip)
 	}
 	accountInfo, err := receiver.accountDao.QueryAccountByMobileDao(param.Mobile)
 	if err != nil {
-		return err
+		return "", err
 	}
 	userInfo, userError := remote_rpc.GetUserAccountById(ctx, accountInfo.Id)
 	if userError != nil {
-		return userError
+		return "", userError
 	}
 	menuList, menuError := remote_rpc.GetUserRoleMenuByUserId(ctx, int(userInfo.Id))
 	if menuError != nil {
-		return menuError
+		return "", menuError
 	}
 	redisError := account_cache.SetUserRedisKeyCache(userInfo.Id, account_param.SessionUserParam{
 		UserName:   userInfo.UserName,
@@ -97,7 +100,7 @@ func (receiver AccountService) PostVerificationCodeServiceByParam(ctx context.Co
 		Menu:       menuList,
 	})
 	if redisError != nil {
-		return redisError
+		return "", redisError
 	}
 	loginError := receiver.accountDao.CreateAccountLoginByParamDao(account_model.LoginTime{
 		AccountId:     accountInfo.Id,
@@ -106,7 +109,14 @@ func (receiver AccountService) PostVerificationCodeServiceByParam(ctx context.Co
 		LoginTime:     gin_model.LocalTime{Time: time.Now()},
 	})
 	_ = account_cache.DeletePhoneRedisKeyCache(param.Mobile)
-	return loginError
+	ginJwt := gin_jwt.NewJwt()
+	token, _ := ginJwt.CreateJwtToken(gin_jwt.CustomClaims{
+		UserId: int(userInfo.Id),
+		StandardClaims: jwt.StandardClaims{
+			ExpiresAt: time.Now().Add(gin_const.DefaultJwtExpiresAt).Unix(),
+		},
+	})
+	return token, loginError
 }
 
 func (receiver AccountService) PostLoginOutServiceByParam(ctx context.Context, param account_param.PostLoginOutRequestParam) error {

@@ -64,13 +64,13 @@ func (receiver *AccountControl) PostVerificationCode(c *gin.Context) {
 	if !ok {
 		zap.L().Warn("PostVerificationCode not get tracerContext")
 	}
-	err := receiver.accountService.PostVerificationCodeServiceByParam(ctx.(context.Context), param)
+	token, err := receiver.accountService.PostVerificationCodeServiceByParam(ctx.(context.Context), param)
 	if err != nil {
 		zap.L().Error("account PostVerificationCode PostVerificationCodeServiceByParam error", zap.Any("error", err))
 		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
 		return
 	}
-	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, token, c)
 }
 
 func (receiver *AccountControl) PostLoginOut(c *gin.Context) {

@@ -7,20 +7,20 @@ import (
 
 type (
 	Role struct {
-		gin_model.BaseMysqlStructV2
+		gin_model.BaseMysqlStruct
 		RoleName string `json:"role_name,omitempty" gorm:"type:varchar(50);comment:角色名称"`
 		Remark   string `json:"remark,omitempty" gorm:"type:varchar(200);comment:说明"`
 	}
 
 	RoleUser struct {
-		gin_model.BaseMysqlStructV2
+		gin_model.BaseMysqlStruct
 		RoleId int    `json:"role_id,omitempty" gorm:"comment:角色id"`
 		UserId int    `json:"user_id,omitempty" gorm:"comment:用户Id"`
 		Remark string `json:"remark,omitempty" gorm:"type:varchar(200);comment:说明"`
 	}
 
 	RoleMenu struct {
-		gin_model.BaseMysqlStructV2
+		gin_model.BaseMysqlStruct
 		MenuId int    `json:"menu_id,omitempty" gorm:"comment:菜单id"`
 		RoleId int    `json:"role_id,omitempty" gorm:"comment:角色id"`
 		Remark string `json:"remark,omitempty" gorm:"type:varchar(200);comment:说明"`

@@ -6,7 +6,7 @@ import (
 )
 
 type Account struct {
-	gin_model.BaseMysqlStructV2
+	gin_model.BaseMysqlStruct
 	Mobile           string `json:"mobile,omitempty" gorm:"type:varchar(11);index:mobile;comment:电话号码"`
 	Email            string `json:"email,omitempty" gorm:"index:email;comment:邮箱"`
 	Password         string `json:"password,omitempty" gorm:"comment:密码"`
@@ -19,7 +19,7 @@ func (Account) TableName() string {
 }
 
 type LoginTime struct {
-	gin_model.BaseMysqlStructV2
+	gin_model.BaseMysqlStruct
 	AccountId     int                 `gorm:"comment:账户id" json:"account_id,omitempty"`
 	LoginType     int                 `json:"login_type" gorm:"comment:-1退出 1登录"`
 	LoginPlatform int                 `json:"login_platform" gorm:"comment:上次登录平台"`
@@ -31,7 +31,7 @@ func (LoginTime) TableName() string {
 }
 
 type VerificationMobileCode struct {
-	gin_model.BaseMysqlStructV2
+	gin_model.BaseMysqlStruct
 	AccountId                  int                 `gorm:"comment:账户id" json:"account_id,omitempty"`
 	VerificationMobileCode     string              `gorm:"comment:验证码" json:"verification_mobile_code,omitempty"`
 	VerificationMobileTime     gin_model.LocalTime `gorm:"comment:发送验证码时间" json:"verification_mobile_time"`
@@ -44,7 +44,7 @@ func (VerificationMobileCode) TableName() string {
 }
 
 type VerificationEmailCode struct {
-	gin_model.BaseMysqlStructV2
+	gin_model.BaseMysqlStruct
 	AccountId                 int                 `gorm:"comment:账户id" json:"account_id,omitempty"`
 	VerificationEmailUrl      string              `gorm:"comment:验证地址" json:"verification_email_url"`
 	VerificationEmailTime     gin_model.LocalTime `gorm:"comment:发送验证时间" json:"verification_email_time"`
