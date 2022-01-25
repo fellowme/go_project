@@ -4,6 +4,7 @@ import (
 	"fmt"
 	gin_app "github.com/fellowme/gin_common_library/app"
 	gin_mysql "github.com/fellowme/gin_common_library/mysql"
+	gin_router "github.com/fellowme/gin_common_library/router"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -34,6 +35,7 @@ func main() {
 	endPoint, app := gin_app.CreateServer("/app/role/role_config/", "go_role")
 	initRouter(app)
 	initTable()
+	gin_router.RegisterRouter(app.Routes())
 	defer gin_app.DeferClose()
 	server := endless.NewServer(endPoint, app)
 	server.BeforeBegin = func(add string) {

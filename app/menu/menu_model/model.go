@@ -8,9 +8,10 @@ import (
 type Menu struct {
 	gin_model.BaseMysqlStruct
 	MenuName string `json:"menu_name,omitempty" gorm:"type:varchar(50);comment:菜单名称"`
-	MenuPath string `json:"menu_path,omitempty" gorm:"type:varchar(200);comment:菜单路径"`
-	MenuType int    `json:"menu_type" gorm:"comment:菜单类型 0无限制 1 get 2 post 3 delete 4 patch 5 put 6 head"`
 	Remark   string `json:"remark,omitempty" gorm:"type:varchar(200);comment:说明"`
+	Method   string `json:"method" gorm:"type:varchar(50);comment:菜单类型"`
+	Path     string `json:"path" gorm:"type:varchar(200);comment:菜单路径"`
+	Handler  string `json:"handler" gorm:"type:varchar(200);comment:处理方式"`
 }
 
 func (Menu) TableName() string {

@@ -34,9 +34,10 @@ func (u RpcService) GetMenuByIds(c context.Context, req *service.MenuRequest) (*
 		menuList = append(menuList, &service.MenuResponse{
 			Id:       int32(menuInfo.Id),
 			MenuName: menuInfo.MenuName,
-			MenuPath: menuInfo.MenuPath,
+			Path:     menuInfo.Path,
 			Remark:   menuInfo.Remark,
-			MenuType: int32(menuInfo.MenuType),
+			Method:   menuInfo.Method,
+			Handler:  menuInfo.Handler,
 		})
 	}
 	return &service.MenuListResponse{

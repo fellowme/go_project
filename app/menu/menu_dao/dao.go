@@ -30,7 +30,7 @@ func GetMenuDao() MenuDao {
 func (d MenuDao) PostMenuByParamDao(param menu_param.PostMenuRequestParam) error {
 	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, menu_const.MenuTableName)
 	defer cancel()
-	if err := tx.Where("menu_path = ? and is_delete = ? ", param.MenuPath, false).FirstOrCreate(&param).Error; err != nil {
+	if err := tx.Where("path = ? and method = ? and is_delete = ? ", param.Path, param.Method, false).FirstOrCreate(&param).Error; err != nil {
 		zap.L().Error("PostMenuDao error", zap.Any("param", param), zap.Any("error", err))
 		return err
 	}
@@ -45,11 +45,11 @@ func (d MenuDao) GetMenuListByParamDao(param menu_param.GetMenuRequestParam) ([]
 	if param.MenuName != "" {
 		tx = tx.Where("menu_name like ?", "%"+param.MenuName+"%")
 	}
-	if param.MenuPath != "" {
-		tx = tx.Where("menu_path like ?", "%"+param.MenuPath+"%")
+	if param.Path != "" {
+		tx = tx.Where("path like ?", "%"+param.Path+"%")
 	}
-	if param.MenuType != 0 {
-		tx = tx.Where("menu_type = ?", param.MenuType)
+	if param.Method != "" {
+		tx = tx.Where("method = ?", param.Method)
 	}
 	err := tx.Count(&total).Limit(param.PageSize).Offset((param.Page - 1) * param.PageSize).Find(&menuList).Error
 	if err != nil {

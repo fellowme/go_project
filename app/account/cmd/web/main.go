@@ -4,6 +4,7 @@ import (
 	"fmt"
 	gin_app "github.com/fellowme/gin_common_library/app"
 	gin_mysql "github.com/fellowme/gin_common_library/mysql"
+	gin_router "github.com/fellowme/gin_common_library/router"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
@@ -35,6 +36,7 @@ func main() {
 	defer gin_app.DeferClose()
 	initRouter(app)
 	initTable()
+	gin_router.RegisterRouter(app.Routes())
 	server := endless.NewServer(endPoint, app)
 	server.BeforeBegin = func(add string) {
 		zap.L().Info(fmt.Sprintf("Actual pid is %d", syscall.Getpid()))
