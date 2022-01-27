@@ -6,7 +6,6 @@ import (
 	gin_util "github.com/fellowme/gin_common_library/util"
 	"go_project/app/role/role_const"
 	"go_project/app/role/role_dao"
-	"go_project/app/role/role_remote_service/remote_rpc"
 	service "go_project/rpc_service"
 	"strconv"
 	"strings"
@@ -22,7 +21,7 @@ func GetRoleRpcService() RpcService {
 	}
 }
 
-func (s RpcService) GetRoleMenuByUserIds(ctx context.Context, req *service.UserRoleMenuRequest) (*service.UserRoleMenuListResponse, error) {
+func (s RpcService) GetRoleByUserIds(ctx context.Context, req *service.UserRoleRequest) (*service.UserRoleListResponse, error) {
 	idList := make([]int, 0)
 	userIdListString := strings.Split(req.UserIds, ",")
 	for _, idString := range userIdListString {
@@ -44,30 +43,9 @@ func (s RpcService) GetRoleMenuByUserIds(ctx context.Context, req *service.UserR
 	if len(roleIdSet) == 0 {
 		return nil, errors.New(role_const.RoleIdNotFindTip)
 	}
-	roleMenuInfoList, queryError := s.dao.QueryRoleMenuListByRoleIdsDao(ctx, roleIdSet)
-	if queryError != nil {
-		return nil, queryError
+	roleIdListInt32 := make([]int32, 0)
+	for _, roleId := range roleIdSet {
+		roleIdListInt32 = append(roleIdListInt32, int32(roleId))
 	}
-	if len(roleMenuInfoList) == 0 {
-		return nil, errors.New(role_const.MenuIdNotFindTip)
-	}
-	menuIdList := make([]int, 0)
-	userRoleMenuList := make([]*service.UserRoleMenuResponse, 0)
-	for _, menuInfo := range roleMenuInfoList {
-		menuIdList = append(menuIdList, menuInfo.MenuId)
-	}
-	menuIdSet := gin_util.RemoveRepetitionIntSlice(menuIdList)
-	menuList, rpcError := remote_rpc.GetMenuList(ctx, menuIdSet)
-	if rpcError != nil {
-		return nil, rpcError
-	}
-	for _, menuInfo := range menuList {
-		userRoleMenuList = append(userRoleMenuList, &service.UserRoleMenuResponse{
-			Id:       menuInfo.Id,
-			MenuName: menuInfo.MenuName,
-			MenuPath: menuInfo.MenuPath,
-			MenuType: menuInfo.MenuType,
-		})
-	}
-	return &service.UserRoleMenuListResponse{MenuList: userRoleMenuList}, nil
+	return &service.UserRoleListResponse{RoleIdList: roleIdListInt32}, nil
 }

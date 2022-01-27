@@ -41,15 +41,15 @@ type (
 
 type (
 	SessionUserParam struct {
-		UserName   string             `json:"user_name,omitempty"`
-		NickName   string             `json:"nick_name,omitempty"`
-		RealName   string             `json:"real_name,omitempty"`
-		Gender     string             `json:"gender,omitempty"`
-		UserStatus string             `json:"user_status,omitempty"`
-		AccountId  int32              `json:"account_id,omitempty"`
-		Mobile     string             `json:"mobile"`
-		Email      string             `json:"email"`
-		Menu       []SessionMenuParam `json:"menu"`
+		UserName   string  `json:"user_name,omitempty"`
+		NickName   string  `json:"nick_name,omitempty"`
+		RealName   string  `json:"real_name,omitempty"`
+		Gender     string  `json:"gender,omitempty"`
+		UserStatus string  `json:"user_status,omitempty"`
+		AccountId  int32   `json:"account_id,omitempty"`
+		Mobile     string  `json:"mobile"`
+		Email      string  `json:"email"`
+		RoleIdList []int32 `json:"role_id_list"`
 	}
 	SessionMenuParam struct {
 		Id       int    `json:"id"`

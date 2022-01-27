@@ -72,9 +72,10 @@ type (
 		RoleId   int    `json:"role_id"`
 		RoleName string `json:"role_name,omitempty"`
 		MenuId   int    `json:"menu_id"`
-		MenuName string `json:"menu_name"`
-		MenuPath string `json:"menu_path"`
-		MenuType int32  `json:"menu_type"`
+		MenuName string `json:"menu_name,omitempty" `
+		Path     string `json:"path" `
+		Method   string `json:"method" `
+		Handler  string `json:"handler" `
 		Remark   string `json:"remark,omitempty"`
 	}
 )

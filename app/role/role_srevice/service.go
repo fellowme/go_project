@@ -141,13 +141,15 @@ func (s RoleService) GetRoleMenuService(ctx context.Context, param role_param.Ge
 		roleMenuList[index].RoleName = roleMap[userRole.RoleId]
 		menuInfo, ok := userMap[userRole.MenuId]
 		if !ok {
-			roleMenuList[index].MenuPath = ""
+			roleMenuList[index].Path = ""
 			roleMenuList[index].MenuName = ""
-			roleMenuList[index].MenuType = 0
+			roleMenuList[index].Handler = ""
+			roleMenuList[index].Method = ""
 		}
-		roleMenuList[index].MenuPath = menuInfo.MenuPath
+		roleMenuList[index].Path = menuInfo.Path
 		roleMenuList[index].MenuName = menuInfo.MenuName
-		roleMenuList[index].MenuType = menuInfo.MenuType
+		roleMenuList[index].Handler = menuInfo.Handler
+		roleMenuList[index].Method = menuInfo.Method
 	}
 	roleMenuResponse.Total = total
 	roleMenuResponse.List = roleMenuList

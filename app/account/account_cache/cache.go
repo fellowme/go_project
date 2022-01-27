@@ -4,11 +4,19 @@ import (
 	"encoding/json"
 	"fmt"
 	gin_redis "github.com/fellowme/gin_common_library/redis"
+	gin_util "github.com/fellowme/gin_common_library/util"
 	"github.com/gomodule/redigo/redis"
 	"go.uber.org/zap"
 	"go_project/app/account/account_const"
 	"go_project/app/account/account_param"
 )
+
+func getTodayLoginUserKeyCacheFormat(key string, flag bool) string {
+	if flag {
+		fmt.Sprintf(account_const.UserLoginFormatString, key, account_const.RedisKeyVersion)
+	}
+	return fmt.Sprintf(account_const.UserLoginOutFormatString, key, account_const.RedisKeyVersion)
+}
 
 func getPhoneCodeKeyCacheFormat(key string) string {
 	return fmt.Sprintf(account_const.PhoneFormatString, key, account_const.RedisKeyVersion)
@@ -55,6 +63,32 @@ func SetPhoneRedisKeyCache(key string, value string, name ...string) {
 			zap.String("key", key), zap.String("value", value),
 			zap.Int("expire_time", account_const.VerificationCodeExpireKeyTimeSecond))
 	}
+}
+
+func GetUserBitRedisKeyCache(key int, flag bool, name ...string) (int, error) {
+	redisName := ""
+	if len(name) != 0 {
+		redisName = name[0]
+	}
+	data, err := gin_redis.GetBitmapKey(redisName, getTodayLoginUserKeyCacheFormat(gin_util.NowTimeToString(), flag), key)
+	if err != nil {
+		zap.L().Error("GetUserBitRedisKeyCache error", zap.Any("error", err), zap.Any("key", key))
+		return data, err
+	}
+	return data, nil
+}
+
+func SetUserBitRedisKeyCache(key, value int, flag bool, name ...string) error {
+	redisName := ""
+	if len(name) != 0 {
+		redisName = name[0]
+	}
+	err := gin_redis.SetBitmapKey(redisName, getTodayLoginUserKeyCacheFormat(gin_util.NowTimeToString(), flag), key, value)
+	if err != nil {
+		zap.L().Error("SetUserBitRedisKeyCache error", zap.Any("error", err), zap.Any("key", key), zap.Any("value", value))
+
+	}
+	return err
 }
 
 func GetUserRedisKeyCache(key int32, name ...string) (account_param.SessionUserParam, error) {

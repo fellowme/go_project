@@ -16,9 +16,11 @@ const (
 const VerificationCodeLength = 4
 
 const (
-	RedisKeyVersion     = "1.0"
-	PhoneFormatString   = "gin-%s-%s"
-	SessionFormatString = "gin-%d-%s"
+	RedisKeyVersion          = "1.0"
+	PhoneFormatString        = "gin-%s-%s"
+	SessionFormatString      = "gin-%d-%s"
+	UserLoginFormatString    = "gin-user-login-%s-%s"
+	UserLoginOutFormatString = "gin-user-login-out-%s-%s"
 )
 
 const (

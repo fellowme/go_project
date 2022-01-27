@@ -4,24 +4,15 @@ option go_package = "./;rpc_service";
 
 package rpc_service;
 
-message UserRoleMenuRequest{
+message UserRoleRequest{
   string UserIds = 1;
 }
 
 
-message UserRoleMenuResponse{
-  int32 id = 1;
-  string MenuName = 2;
-  string Path = 3;
-  string Remark = 4;
-  string Method = 5;
-  string Handler = 6;
+message UserRoleListResponse{
+  repeated int32 RoleIdList = 1;
 }
 
-message UserRoleMenuListResponse{
-  repeated UserRoleMenuResponse menuList = 1;
-}
-
-service UserRoleMenuService {
-  rpc GetRoleMenuByUserIds(UserRoleMenuRequest) returns (UserRoleMenuListResponse);
+service UserRoleService {
+  rpc GetRoleByUserIds(UserRoleRequest) returns (UserRoleListResponse);
 }

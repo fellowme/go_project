@@ -84,7 +84,7 @@ func (receiver AccountService) PostVerificationCodeServiceByParam(ctx context.Co
 	if userError != nil {
 		return "", userError
 	}
-	menuList, menuError := remote_rpc.GetUserRoleMenuByUserId(ctx, int(userInfo.Id))
+	roleIdList, menuError := remote_rpc.GetUserRoleMenuByUserId(ctx, int(userInfo.Id))
 	if menuError != nil {
 		return "", menuError
 	}
@@ -97,13 +97,13 @@ func (receiver AccountService) PostVerificationCodeServiceByParam(ctx context.Co
 		AccountId:  userInfo.AccountId,
 		Mobile:     accountInfo.Mobile,
 		Email:      accountInfo.Email,
-		Menu:       menuList,
+		RoleIdList: roleIdList,
 	})
 	if redisError != nil {
 		return "", redisError
 	}
 	loginError := receiver.accountDao.CreateAccountLoginByParamDao(account_model.LoginTime{
-		AccountId:     accountInfo.Id,
+		UserId:        int(userInfo.Id),
 		LoginType:     1,
 		LoginPlatform: param.LoginPlatform,
 		LoginTime:     gin_model.LocalTime{Time: time.Now()},
@@ -120,16 +120,12 @@ func (receiver AccountService) PostVerificationCodeServiceByParam(ctx context.Co
 }
 
 func (receiver AccountService) PostLoginOutServiceByParam(ctx context.Context, param account_param.PostLoginOutRequestParam) error {
-	sessionUser, err := account_cache.GetUserRedisKeyCache(int32(param.UserId))
-	if err != nil {
-		return err
-	}
 	deleteError := account_cache.DeleteUserRedisKeyCache(int32(param.UserId))
 	if deleteError != nil {
 		return deleteError
 	}
 	return receiver.accountDao.CreateAccountLoginByParamDao(account_model.LoginTime{
-		AccountId:     int(sessionUser.AccountId),
+		UserId:        param.UserId,
 		LoginPlatform: param.LoginPlatform,
 		LoginType:     -1,
 		LoginTime:     gin_model.LocalTime{Time: time.Now()},
@@ -148,7 +144,7 @@ func (receiver AccountService) PostLoginServiceByParam(ctx context.Context, para
 	if userError != nil {
 		return userError
 	}
-	menuList, menuError := remote_rpc.GetUserRoleMenuByUserId(ctx, int(userInfo.Id))
+	roleIdList, menuError := remote_rpc.GetUserRoleMenuByUserId(ctx, int(userInfo.Id))
 	if menuError != nil {
 		return menuError
 	}
@@ -161,13 +157,13 @@ func (receiver AccountService) PostLoginServiceByParam(ctx context.Context, para
 		AccountId:  userInfo.AccountId,
 		Mobile:     accountInfo.Mobile,
 		Email:      accountInfo.Email,
-		Menu:       menuList,
+		RoleIdList: roleIdList,
 	})
 	if redisError != nil {
 		return redisError
 	}
 	loginError := receiver.accountDao.CreateAccountLoginByParamDao(account_model.LoginTime{
-		AccountId:     accountInfo.Id,
+		UserId:        int(userInfo.Id),
 		LoginType:     1,
 		LoginPlatform: param.LoginPlatform,
 		LoginTime:     gin_model.LocalTime{Time: time.Now()},
