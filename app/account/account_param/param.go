@@ -54,7 +54,8 @@ type (
 	SessionMenuParam struct {
 		Id       int    `json:"id"`
 		MenuName string `json:"menu_name,omitempty" `
-		MenuPath string `json:"menu_path,omitempty" `
-		MenuType int    `json:"menu_type"`
+		Path     string `json:"path" `
+		Method   string `json:"method" `
+		Handler  string `json:"handler" `
 	}
 )

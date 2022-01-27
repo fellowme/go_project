@@ -51,8 +51,9 @@ func GetUserRoleMenuByUserId(ctx context.Context, userId int) ([]account_param.S
 		menuSession = append(menuSession, account_param.SessionMenuParam{
 			Id:       int(menuInfo.Id),
 			MenuName: menuInfo.MenuName,
-			MenuPath: menuInfo.MenuPath,
-			MenuType: int(menuInfo.MenuType),
+			Path:     menuInfo.Path,
+			Method:   menuInfo.Method,
+			Handler:  menuInfo.Handler,
 		})
 	}
 	return menuSession, nil

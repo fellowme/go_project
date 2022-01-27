@@ -12,8 +12,10 @@ message UserRoleMenuRequest{
 message UserRoleMenuResponse{
   int32 id = 1;
   string MenuName = 2;
-  string MenuPath = 3;
-  int32 MenuType = 5;
+  string Path = 3;
+  string Remark = 4;
+  string Method = 5;
+  string Handler = 6;
 }
 
 message UserRoleMenuListResponse{
