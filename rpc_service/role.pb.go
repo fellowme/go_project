@@ -71,6 +71,53 @@ func (x *UserRoleRequest) GetUserIds() string {
 	return ""
 }
 
+type MenuRoleRequest struct {
+	state         protoimpl.MessageState
+	sizeCache     protoimpl.SizeCache
+	unknownFields protoimpl.UnknownFields
+
+	MenuIds string `protobuf:"bytes,1,opt,name=MenuIds,proto3" json:"MenuIds,omitempty"`
+}
+
+func (x *MenuRoleRequest) Reset() {
+	*x = MenuRoleRequest{}
+	if protoimpl.UnsafeEnabled {
+		mi := &file_role_proto_msgTypes[1]
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		ms.StoreMessageInfo(mi)
+	}
+}
+
+func (x *MenuRoleRequest) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*MenuRoleRequest) ProtoMessage() {}
+
+func (x *MenuRoleRequest) ProtoReflect() protoreflect.Message {
+	mi := &file_role_proto_msgTypes[1]
+	if protoimpl.UnsafeEnabled && x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use MenuRoleRequest.ProtoReflect.Descriptor instead.
+func (*MenuRoleRequest) Descriptor() ([]byte, []int) {
+	return file_role_proto_rawDescGZIP(), []int{1}
+}
+
+func (x *MenuRoleRequest) GetMenuIds() string {
+	if x != nil {
+		return x.MenuIds
+	}
+	return ""
+}
+
 type UserRoleListResponse struct {
 	state         protoimpl.MessageState
 	sizeCache     protoimpl.SizeCache
@@ -82,7 +129,7 @@ type UserRoleListResponse struct {
 func (x *UserRoleListResponse) Reset() {
 	*x = UserRoleListResponse{}
 	if protoimpl.UnsafeEnabled {
-		mi := &file_role_proto_msgTypes[1]
+		mi := &file_role_proto_msgTypes[2]
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		ms.StoreMessageInfo(mi)
 	}
@@ -95,7 +142,7 @@ func (x *UserRoleListResponse) String() string {
 func (*UserRoleListResponse) ProtoMessage() {}
 
 func (x *UserRoleListResponse) ProtoReflect() protoreflect.Message {
-	mi := &file_role_proto_msgTypes[1]
+	mi := &file_role_proto_msgTypes[2]
 	if protoimpl.UnsafeEnabled && x != nil {
 		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
 		if ms.LoadMessageInfo() == nil {
@@ -108,7 +155,7 @@ func (x *UserRoleListResponse) ProtoReflect() protoreflect.Message {
 
 // Deprecated: Use UserRoleListResponse.ProtoReflect.Descriptor instead.
 func (*UserRoleListResponse) Descriptor() ([]byte, []int) {
-	return file_role_proto_rawDescGZIP(), []int{1}
+	return file_role_proto_rawDescGZIP(), []int{2}
 }
 
 func (x *UserRoleListResponse) GetRoleIdList() []int32 {
@@ -125,18 +172,27 @@ var file_role_proto_rawDesc = []byte{
 	0x63, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x22, 0x2b, 0x0a, 0x0f, 0x55, 0x73, 0x65,
 	0x72, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07,
 	0x55, 0x73, 0x65, 0x72, 0x49, 0x64, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x55,
-	0x73, 0x65, 0x72, 0x49, 0x64, 0x73, 0x22, 0x36, 0x0a, 0x14, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f,
-	0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1e,
-	0x0a, 0x0a, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x01, 0x20, 0x03,
-	0x28, 0x05, 0x52, 0x0a, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x32, 0x66,
-	0x0a, 0x0f, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x12, 0x53, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x42, 0x79, 0x55, 0x73,
-	0x65, 0x72, 0x49, 0x64, 0x73, 0x12, 0x1c, 0x2e, 0x72, 0x70, 0x63, 0x5f, 0x73, 0x65, 0x72, 0x76,
-	0x69, 0x63, 0x65, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75,
-	0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x72, 0x70, 0x63, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
-	0x65, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65,
-	0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x10, 0x5a, 0x0e, 0x2e, 0x2f, 0x3b, 0x72, 0x70, 0x63,
-	0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f, 0x74, 0x6f, 0x33,
+	0x73, 0x65, 0x72, 0x49, 0x64, 0x73, 0x22, 0x2b, 0x0a, 0x0f, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x6f,
+	0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x12, 0x18, 0x0a, 0x07, 0x4d, 0x65, 0x6e,
+	0x75, 0x49, 0x64, 0x73, 0x18, 0x01, 0x20, 0x01, 0x28, 0x09, 0x52, 0x07, 0x4d, 0x65, 0x6e, 0x75,
+	0x49, 0x64, 0x73, 0x22, 0x36, 0x0a, 0x14, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x4c,
+	0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x12, 0x1e, 0x0a, 0x0a, 0x52,
+	0x6f, 0x6c, 0x65, 0x49, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x18, 0x01, 0x20, 0x03, 0x28, 0x05, 0x52,
+	0x0a, 0x52, 0x6f, 0x6c, 0x65, 0x49, 0x64, 0x4c, 0x69, 0x73, 0x74, 0x32, 0xbb, 0x01, 0x0a, 0x0f,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x53, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x12,
+	0x53, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x42, 0x79, 0x55, 0x73, 0x65, 0x72,
+	0x49, 0x64, 0x73, 0x12, 0x1c, 0x2e, 0x72, 0x70, 0x63, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63,
+	0x65, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x52, 0x65, 0x71, 0x75, 0x65, 0x73,
+	0x74, 0x1a, 0x21, 0x2e, 0x72, 0x70, 0x63, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e,
+	0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x69, 0x73, 0x74, 0x52, 0x65, 0x73, 0x70,
+	0x6f, 0x6e, 0x73, 0x65, 0x12, 0x53, 0x0a, 0x10, 0x47, 0x65, 0x74, 0x52, 0x6f, 0x6c, 0x65, 0x42,
+	0x79, 0x4d, 0x65, 0x6e, 0x75, 0x49, 0x64, 0x73, 0x12, 0x1c, 0x2e, 0x72, 0x70, 0x63, 0x5f, 0x73,
+	0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x2e, 0x4d, 0x65, 0x6e, 0x75, 0x52, 0x6f, 0x6c, 0x65, 0x52,
+	0x65, 0x71, 0x75, 0x65, 0x73, 0x74, 0x1a, 0x21, 0x2e, 0x72, 0x70, 0x63, 0x5f, 0x73, 0x65, 0x72,
+	0x76, 0x69, 0x63, 0x65, 0x2e, 0x55, 0x73, 0x65, 0x72, 0x52, 0x6f, 0x6c, 0x65, 0x4c, 0x69, 0x73,
+	0x74, 0x52, 0x65, 0x73, 0x70, 0x6f, 0x6e, 0x73, 0x65, 0x42, 0x10, 0x5a, 0x0e, 0x2e, 0x2f, 0x3b,
+	0x72, 0x70, 0x63, 0x5f, 0x73, 0x65, 0x72, 0x76, 0x69, 0x63, 0x65, 0x62, 0x06, 0x70, 0x72, 0x6f,
+	0x74, 0x6f, 0x33,
 }
 
 var (
@@ -151,16 +207,19 @@ func file_role_proto_rawDescGZIP() []byte {
 	return file_role_proto_rawDescData
 }
 
-var file_role_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_role_proto_msgTypes = make([]protoimpl.MessageInfo, 3)
 var file_role_proto_goTypes = []interface{}{
 	(*UserRoleRequest)(nil),      // 0: rpc_service.UserRoleRequest
-	(*UserRoleListResponse)(nil), // 1: rpc_service.UserRoleListResponse
+	(*MenuRoleRequest)(nil),      // 1: rpc_service.MenuRoleRequest
+	(*UserRoleListResponse)(nil), // 2: rpc_service.UserRoleListResponse
 }
 var file_role_proto_depIdxs = []int32{
 	0, // 0: rpc_service.UserRoleService.GetRoleByUserIds:input_type -> rpc_service.UserRoleRequest
-	1, // 1: rpc_service.UserRoleService.GetRoleByUserIds:output_type -> rpc_service.UserRoleListResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	1, // 1: rpc_service.UserRoleService.GetRoleByMenuIds:input_type -> rpc_service.MenuRoleRequest
+	2, // 2: rpc_service.UserRoleService.GetRoleByUserIds:output_type -> rpc_service.UserRoleListResponse
+	2, // 3: rpc_service.UserRoleService.GetRoleByMenuIds:output_type -> rpc_service.UserRoleListResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -185,6 +244,18 @@ func file_role_proto_init() {
 			}
 		}
 		file_role_proto_msgTypes[1].Exporter = func(v interface{}, i int) interface{} {
+			switch v := v.(*MenuRoleRequest); i {
+			case 0:
+				return &v.state
+			case 1:
+				return &v.sizeCache
+			case 2:
+				return &v.unknownFields
+			default:
+				return nil
+			}
+		}
+		file_role_proto_msgTypes[2].Exporter = func(v interface{}, i int) interface{} {
 			switch v := v.(*UserRoleListResponse); i {
 			case 0:
 				return &v.state
@@ -203,7 +274,7 @@ func file_role_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: file_role_proto_rawDesc,
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   3,
 			NumExtensions: 0,
 			NumServices:   1,
 		},
@@ -230,6 +301,7 @@ const _ = grpc.SupportPackageIsVersion6
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://godoc.org/google.golang.org/grpc#ClientConn.NewStream.
 type UserRoleServiceClient interface {
 	GetRoleByUserIds(ctx context.Context, in *UserRoleRequest, opts ...grpc.CallOption) (*UserRoleListResponse, error)
+	GetRoleByMenuIds(ctx context.Context, in *MenuRoleRequest, opts ...grpc.CallOption) (*UserRoleListResponse, error)
 }
 
 type userRoleServiceClient struct {
@@ -249,9 +321,19 @@ func (c *userRoleServiceClient) GetRoleByUserIds(ctx context.Context, in *UserRo
 	return out, nil
 }
 
+func (c *userRoleServiceClient) GetRoleByMenuIds(ctx context.Context, in *MenuRoleRequest, opts ...grpc.CallOption) (*UserRoleListResponse, error) {
+	out := new(UserRoleListResponse)
+	err := c.cc.Invoke(ctx, "/rpc_service.UserRoleService/GetRoleByMenuIds", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UserRoleServiceServer is the server API for UserRoleService service.
 type UserRoleServiceServer interface {
 	GetRoleByUserIds(context.Context, *UserRoleRequest) (*UserRoleListResponse, error)
+	GetRoleByMenuIds(context.Context, *MenuRoleRequest) (*UserRoleListResponse, error)
 }
 
 // UnimplementedUserRoleServiceServer can be embedded to have forward compatible implementations.
@@ -260,6 +342,9 @@ type UnimplementedUserRoleServiceServer struct {
 
 func (*UnimplementedUserRoleServiceServer) GetRoleByUserIds(context.Context, *UserRoleRequest) (*UserRoleListResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRoleByUserIds not implemented")
+}
+func (*UnimplementedUserRoleServiceServer) GetRoleByMenuIds(context.Context, *MenuRoleRequest) (*UserRoleListResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetRoleByMenuIds not implemented")
 }
 
 func RegisterUserRoleServiceServer(s *grpc.Server, srv UserRoleServiceServer) {
@@ -284,6 +369,24 @@ func _UserRoleService_GetRoleByUserIds_Handler(srv interface{}, ctx context.Cont
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UserRoleService_GetRoleByMenuIds_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(MenuRoleRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UserRoleServiceServer).GetRoleByMenuIds(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/rpc_service.UserRoleService/GetRoleByMenuIds",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UserRoleServiceServer).GetRoleByMenuIds(ctx, req.(*MenuRoleRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 var _UserRoleService_serviceDesc = grpc.ServiceDesc{
 	ServiceName: "rpc_service.UserRoleService",
 	HandlerType: (*UserRoleServiceServer)(nil),
@@ -291,6 +394,10 @@ var _UserRoleService_serviceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetRoleByUserIds",
 			Handler:    _UserRoleService_GetRoleByUserIds_Handler,
+		},
+		{
+			MethodName: "GetRoleByMenuIds",
+			Handler:    _UserRoleService_GetRoleByMenuIds_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

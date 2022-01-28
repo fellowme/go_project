@@ -8,6 +8,10 @@ message UserRoleRequest{
   string UserIds = 1;
 }
 
+message MenuRoleRequest{
+  string MenuIds = 1;
+}
+
 
 message UserRoleListResponse{
   repeated int32 RoleIdList = 1;
@@ -15,4 +19,5 @@ message UserRoleListResponse{
 
 service UserRoleService {
   rpc GetRoleByUserIds(UserRoleRequest) returns (UserRoleListResponse);
+  rpc GetRoleByMenuIds(MenuRoleRequest) returns (UserRoleListResponse);
 }

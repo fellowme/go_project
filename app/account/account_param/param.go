@@ -17,7 +17,7 @@ type (
 		LoginPlatform          int    `json:"login_platform" form:"login_platform" binding:"required"`
 	}
 	PostLoginOutRequestParam struct {
-		UserId        int `json:"user_id,omitempty" form:"user_id" binding:"required"`
+		UserId        int
 		LoginPlatform int `json:"login_platform" form:"login_platform" binding:"required"`
 	}
 	PostLoginRequestParam struct {

@@ -49,3 +49,32 @@ func (s RpcService) GetRoleByUserIds(ctx context.Context, req *service.UserRoleR
 	}
 	return &service.UserRoleListResponse{RoleIdList: roleIdListInt32}, nil
 }
+
+func (s RpcService) GetRoleByMenuIds(ctx context.Context, req *service.MenuRoleRequest) (*service.UserRoleListResponse, error) {
+	menuIdList := make([]int, 0)
+	menuIdListString := strings.Split(req.MenuIds, ",")
+	for _, idString := range menuIdListString {
+		idInt, err := strconv.Atoi(idString)
+		if err != nil {
+			continue
+		}
+		menuIdList = append(menuIdList, idInt)
+	}
+	roleList, err := s.dao.QueryRoleByMenuIdsDao(ctx, menuIdList)
+	if err != nil {
+		return nil, err
+	}
+	roleIdList := make([]int, 0)
+	for _, role := range roleList {
+		roleIdList = append(roleIdList, role.Id)
+	}
+	roleIdSet := gin_util.RemoveRepetitionIntSlice(roleIdList)
+	if len(roleIdSet) == 0 {
+		return nil, errors.New(role_const.RoleIdNotFindTip)
+	}
+	roleIdListInt32 := make([]int32, 0)
+	for _, roleId := range roleIdSet {
+		roleIdListInt32 = append(roleIdListInt32, int32(roleId))
+	}
+	return &service.UserRoleListResponse{RoleIdList: roleIdListInt32}, nil
+}
