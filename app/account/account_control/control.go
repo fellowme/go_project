@@ -80,6 +80,7 @@ func (receiver *AccountControl) PostLoginOut(c *gin.Context) {
 		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
 		return
 	}
+	param.UserId = c.GetInt("user_id")
 	ctx, ok := c.Get("tracerContext")
 	if !ok {
 		zap.L().Warn("PostLoginOut not get tracerContext")

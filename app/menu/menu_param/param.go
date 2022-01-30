@@ -4,22 +4,24 @@ import "github.com/fellowme/gin_common_library/param"
 
 type (
 	PostMenuRequestParam struct {
-		MenuName string `json:"menu_name,omitempty" form:"menu_name" binding:"required"`
-		MenuPath string `json:"menu_path,omitempty" form:"menu_path" binding:"required"`
-		MenuType int    `json:"menu_type" form:"menu_type"`
+		MenuName string `json:"menu_name,omitempty" form:"menu_name"`
+		Path     string `json:"path" form:"path" binding:"required"`
+		Method   string `json:"method" form:"method" binding:"required"`
+		Handler  string `json:"handler" form:"handler" binding:"required"`
 		Remark   string `json:"remark,omitempty" form:"remark"`
 	}
 	GetMenuRequestParam struct {
 		param.PageRequestParam
 		MenuName string `json:"menu_name,omitempty" form:"menu_name"`
-		MenuPath string `json:"menu_path,omitempty" form:"menu_path"`
-		MenuType int    `json:"menu_type" form:"menu_type"`
+		Path     string `json:"path" form:"path" `
+		Method   string `json:"method" form:"method"`
 	}
 	PatchMenuRequestParam struct {
 		Id       int
 		MenuName string `json:"menu_name,omitempty" form:"menu_name"`
-		MenuPath string `json:"menu_path,omitempty" form:"menu_path"`
-		MenuType int    `json:"menu_type" form:"menu_type"`
+		Path     string `json:"path" form:"path" `
+		Method   string `json:"method" form:"method" `
+		Handler  string `json:"handler" form:"handler" `
 		Remark   string `json:"remark,omitempty" form:"remark"`
 	}
 )
@@ -32,8 +34,9 @@ type (
 	MenuResponse struct {
 		Id       int    `json:"id"`
 		MenuName string `json:"menu_name,omitempty" `
-		MenuPath string `json:"menu_path,omitempty" `
-		MenuType int    `json:"menu_type"`
-		Remark   string `json:"remark,omitempty"`
+		Path     string `json:"path" `
+		Method   string `json:"method" `
+		Handler  string `json:"handler" `
+		Remark   string `json:"remark,omitempty" `
 	}
 )

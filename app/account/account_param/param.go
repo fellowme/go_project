@@ -17,7 +17,7 @@ type (
 		LoginPlatform          int    `json:"login_platform" form:"login_platform" binding:"required"`
 	}
 	PostLoginOutRequestParam struct {
-		UserId        int `json:"user_id,omitempty" form:"user_id" binding:"required"`
+		UserId        int
 		LoginPlatform int `json:"login_platform" form:"login_platform" binding:"required"`
 	}
 	PostLoginRequestParam struct {
@@ -41,20 +41,21 @@ type (
 
 type (
 	SessionUserParam struct {
-		UserName   string             `json:"user_name,omitempty"`
-		NickName   string             `json:"nick_name,omitempty"`
-		RealName   string             `json:"real_name,omitempty"`
-		Gender     string             `json:"gender,omitempty"`
-		UserStatus string             `json:"user_status,omitempty"`
-		AccountId  int32              `json:"account_id,omitempty"`
-		Mobile     string             `json:"mobile"`
-		Email      string             `json:"email"`
-		Menu       []SessionMenuParam `json:"menu"`
+		UserName   string  `json:"user_name,omitempty"`
+		NickName   string  `json:"nick_name,omitempty"`
+		RealName   string  `json:"real_name,omitempty"`
+		Gender     string  `json:"gender,omitempty"`
+		UserStatus string  `json:"user_status,omitempty"`
+		AccountId  int32   `json:"account_id,omitempty"`
+		Mobile     string  `json:"mobile"`
+		Email      string  `json:"email"`
+		RoleIdList []int32 `json:"role_id_list"`
 	}
 	SessionMenuParam struct {
 		Id       int    `json:"id"`
 		MenuName string `json:"menu_name,omitempty" `
-		MenuPath string `json:"menu_path,omitempty" `
-		MenuType int    `json:"menu_type"`
+		Path     string `json:"path" `
+		Method   string `json:"method" `
+		Handler  string `json:"handler" `
 	}
 )

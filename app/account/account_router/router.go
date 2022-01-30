@@ -13,7 +13,7 @@ func InitRouter(group *gin.RouterGroup) {
 		accountRouter.GET("", gin_jwt.JwtAuth(), control.GetAccountList)
 		accountRouter.POST("/send_code", control.PostSendCode)
 		accountRouter.POST("/verification_code", control.PostVerificationCode)
-		accountRouter.POST("/login_out", control.PostLoginOut)
+		accountRouter.POST("/login_out", gin_jwt.JwtAuth(), control.PostLoginOut)
 		accountRouter.POST("/login", control.PostLogin)
 	}
 }

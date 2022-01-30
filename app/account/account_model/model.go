@@ -20,7 +20,7 @@ func (Account) TableName() string {
 
 type LoginTime struct {
 	gin_model.BaseMysqlStruct
-	AccountId     int                 `gorm:"comment:账户id" json:"account_id,omitempty"`
+	UserId        int                 `gorm:"comment:用户id" json:"account_id,omitempty"`
 	LoginType     int                 `json:"login_type" gorm:"comment:-1退出 1登录"`
 	LoginPlatform int                 `json:"login_platform" gorm:"comment:上次登录平台"`
 	LoginTime     gin_model.LocalTime `json:"login_time" gorm:"comment:上次登录时间"`

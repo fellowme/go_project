@@ -2,36 +2,20 @@ package main
 
 import (
 	"fmt"
-	"go_project/app/account/account_model"
-	"go_project/app/user/user_router"
-	"syscall"
-	"time"
-
-	gin_config "github.com/fellowme/gin_common_library/config"
-	gin_jaeger "github.com/fellowme/gin_common_library/jaeger"
-	gin_logger "github.com/fellowme/gin_common_library/logger"
+	gin_app "github.com/fellowme/gin_common_library/app"
 	gin_mysql "github.com/fellowme/gin_common_library/mysql"
-	gin_redis "github.com/fellowme/gin_common_library/redis"
-	gin_translator "github.com/fellowme/gin_common_library/translator"
-	gin_util "github.com/fellowme/gin_common_library/util"
+	gin_router "github.com/fellowme/gin_common_library/router"
 	"github.com/fvbock/endless"
 	"github.com/gin-gonic/gin"
 	"go.uber.org/zap"
+	"go_project/app/user/user_model"
+	"go_project/app/user/user_router"
+	"syscall"
 )
 
 /*
-	初始化配置文件
+	initRouter  初始化路由
 */
-func initExtend() {
-	path := gin_util.GetPath()
-	gin_config.InitConfig(path+"/app/user/user_config/", "go_user")
-	gin_logger.InitServerLogger(path)
-	gin_logger.InitRecoveryLogger(path)
-	gin_redis.InitRedis()
-	gin_mysql.InitMysqlMap()
-	gin_jaeger.InitJaegerTracer()
-	gin_translator.InitTranslator()
-}
 
 func initRouter(app *gin.Engine) {
 	api := app.Group("/api/v1")
@@ -39,22 +23,10 @@ func initRouter(app *gin.Engine) {
 }
 
 /*
-	初始化app
-*/
-func creatApp() *gin.Engine {
-	initExtend()
-	app := gin.New()
-	app.Use(gin_logger.RecoveryWithZap(gin_logger.RecoveryLogger,
-		gin_config.ServerConfigSettings.Server.IsDebug), gin_jaeger.JaegerMiddleWare())
-	initRouter(app)
-	return app
-}
-
-/*
-	初始化mysql 表信息
+	initTable 初始化mysql 表信息
 */
 func initTable() {
-	err := gin_mysql.UseMysql(nil).AutoMigrate(account_model.Account{}, account_model.VerificationEmailCode{}, account_model.VerificationMobileCode{}, account_model.LoginTime{}).Error
+	err := gin_mysql.UseMysql(nil).AutoMigrate(&user_model.User{})
 	if err != nil {
 		zap.L().Error("UseMysql error", zap.Any("error", err))
 	}
@@ -64,18 +36,11 @@ func initTable() {
 	主程序
 */
 func main() {
-	if !gin_config.ServerConfigSettings.Server.IsDebug {
-		gin.SetMode(gin.ReleaseMode)
-	}
-	app := creatApp()
-	defer gin_mysql.CloseMysqlConnect()
-	defer gin_jaeger.IoCloser()
+	endPoint, app := gin_app.CreateServer("/app/user/user_config/", "go_user")
+	initRouter(app)
 	initTable()
-	endless.DefaultReadTimeOut = time.Duration(gin_config.ServerConfigSettings.Server.ReadTimeout) * time.Second
-	endless.DefaultWriteTimeOut = time.Duration(gin_config.ServerConfigSettings.Server.WriteTimeout) * time.Second
-	endless.DefaultMaxHeaderBytes = 1 << 20
-	endPoint := fmt.Sprintf("%s:%d", gin_config.ServerConfigSettings.Server.ServerHost,
-		gin_config.ServerConfigSettings.Server.ServerPort)
+	gin_router.RegisterRouter(app.Routes())
+	defer gin_app.DeferClose()
 	server := endless.NewServer(endPoint, app)
 	server.BeforeBegin = func(add string) {
 		zap.L().Info(fmt.Sprintf("Actual pid is %d", syscall.Getpid()))
