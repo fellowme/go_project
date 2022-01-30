@@ -27,6 +27,7 @@ type RoleDaoInterface interface {
 	PostRoleMenuByParamDao(param role_param.PostRoleMenuRequestParam) error
 	GetRoleMenuListByParamDao(param role_param.GetRoleMenuRequestParam) ([]role_param.RoleMenuParam, int64, error)
 	DeleteRoleMenuByIdDao(id int) error
+	QueryRoleGroup(ctx context.Context) ([]role_param.RoleMenuIdsParam, error)
 }
 
 type RoleDao struct {
@@ -219,6 +220,17 @@ func (d RoleDao) QueryRoleByMenuIdsDao(ctx context.Context, menuIdList []int) ([
 	err := tx.Where("menu_id in (?) and is_delete = ?", menuIdList, false).Find(&roleMenuList).Error
 	if err != nil {
 		zap.L().Error("QueryRoleByMenuIdsDao find error ", zap.Any("error", err), zap.Any("menuIdList", menuIdList))
+	}
+	return roleMenuList, err
+}
+
+func (d RoleDao) QueryRoleGroup(ctx context.Context) ([]role_param.RoleMenuIdsParam, error) {
+	var roleMenuList []role_param.RoleMenuIdsParam
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, ctx, role_const.RoleMenuTableName)
+	defer cancel()
+	err := tx.Select("role_id AS role_id ,GROUP_CONCAT(menu_id) AS menu_ids").Where(" is_delete = ?", false).Group("role_id").Find(&roleMenuList).Error
+	if err != nil {
+		zap.L().Error("QueryRoleGroup find error ", zap.Any("error", err))
 	}
 	return roleMenuList, err
 }

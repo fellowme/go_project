@@ -194,3 +194,54 @@ func (r RoleControl) GetRoleMenu(c *gin.Context) {
 	}
 	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, data, c)
 }
+
+func (r RoleControl) RebuildRoleMenu(c *gin.Context) {
+	ctx, ok := c.Get("tracerContext")
+	if !ok {
+		zap.L().Warn("role RebuildRoleMenu not get tracerContext")
+	}
+	err := r.service.RebuildRoleMenuService(ctx.(context.Context))
+	if err != nil {
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
+		return
+	}
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)
+}
+
+func (r RoleControl) DeleteRoleMenuMap(c *gin.Context) {
+	var param role_param.PostDeleteRoleMenuRequestParam
+	if err := c.ShouldBind(&param); err != nil {
+		zap.L().Error("role DeleteRoleMenuMap error", zap.Any("error", err))
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
+		return
+	}
+	ctx, ok := c.Get("tracerContext")
+	if !ok {
+		zap.L().Warn("role DeleteRoleMenuMap not get tracerContext")
+	}
+	err := r.service.DeleteRoleMenuMapService(ctx.(context.Context), param)
+	if err != nil {
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
+		return
+	}
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)
+}
+
+func (r RoleControl) RoleMenuMapMatch(c *gin.Context) {
+	var param role_param.PostRoleMenuMatchRequestParam
+	if err := c.ShouldBind(&param); err != nil {
+		zap.L().Error("role RoleMenuMapMatch error", zap.Any("error", err))
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
+		return
+	}
+	ctx, ok := c.Get("tracerContext")
+	if !ok {
+		zap.L().Warn("role DeleteRoleMenuMap not get tracerContext")
+	}
+	err := r.service.RoleMenuMapMatchService(ctx.(context.Context), param)
+	if err != nil {
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
+		return
+	}
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)
+}

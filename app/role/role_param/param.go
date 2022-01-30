@@ -36,6 +36,16 @@ type (
 		MenuId int    `json:"menu_id" form:"menu_id" binding:"required"`
 		Remark string `json:"remark,omitempty" form:"remark"`
 	}
+	PostDeleteRoleMenuRequestParam struct {
+		Path   string `json:"path" form:"path" binding:"required"`
+		RoleId int    `json:"role_id" form:"role_id" binding:"required"`
+		Method string `json:"method" form:"method" binding:"required"`
+	}
+	PostRoleMenuMatchRequestParam struct {
+		Path   string `json:"path" form:"path" binding:"required"`
+		RoleId int    `json:"role_id" form:"role_id" binding:"required"`
+		Method string `json:"method" form:"method" binding:"required"`
+	}
 )
 
 type (
@@ -77,5 +87,9 @@ type (
 		Method   string `json:"method" `
 		Handler  string `json:"handler" `
 		Remark   string `json:"remark,omitempty"`
+	}
+	RoleMenuIdsParam struct {
+		RoleId  int    `json:"role_id"`
+		MenuIds string `json:"menu_ids"`
 	}
 )
