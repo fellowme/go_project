@@ -37,17 +37,18 @@ func (s ImageService) GetImageListByParamService(param image_param.GetImageReque
 }
 
 func (s ImageService) CreateImageByImageService(c *gin.Context, files []*multipart.FileHeader) map[string]string {
-	basePath := gin_util.GetPath() + "/upload/"
+	basePath := gin_util.GetPath()
 	imageMap := make(map[string]string, 0)
 	userId := c.GetInt("user_id")
 	for index, file := range files {
-		filename := basePath + filepath.Base(file.Filename)
-		if err := c.SaveUploadedFile(file, filename); err != nil {
+		filename := "/upload/" + filepath.Base(file.Filename)
+		osName := basePath + filename
+		if err := c.SaveUploadedFile(file, osName); err != nil {
 			zap.L().Error("CreateImageByImageService error", zap.Any("error", err), zap.String("fileName", filename))
 			imageMap[filename] = err.Error()
 		} else {
 			err := s.dao.CreateImageDao(image_model.Image{
-				ImageUrl:        filename,
+				ImageUrl:        "/upload/" + filepath.Base(file.Filename),
 				ImageName:       file.Filename,
 				ImageUniqueName: "",
 				ImageSort:       index,
@@ -62,7 +63,6 @@ func (s ImageService) CreateImageByImageService(c *gin.Context, files []*multipa
 			} else {
 				imageMap[filename] = ""
 			}
-
 		}
 	}
 	return imageMap

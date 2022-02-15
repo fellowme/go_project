@@ -2,7 +2,7 @@
 #this files directory 
 base_path=$(cd `dirname $0`; pwd)
 echo "current directory are: $base_path"
-app_mod="menu"
+app_mod="brand"
 
 cd $base_path"/app"
 
@@ -36,6 +36,9 @@ echo package $app_mod"_param" >$base_path"/app/"$app_mod"/"$app_mod"_param/"para
 
 mkdir $app_mod"_const"
 echo package $app_mod"_const" >$base_path"/app/"$app_mod"/"$app_mod"_const/"const.go
+
+mkdir $app_mod"_rpc"
+echo package $app_mod"_rpc" >$base_path"/app/"$app_mod"/"$app_mod"_rpc/"rpc.go
 
 cmd="cmd"
 mkdir $cmd

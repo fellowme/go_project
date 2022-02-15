@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+option go_package = "./;rpc_service";
+
+package rpc_service;
+
+message CategoryRequest{
+  string CategoryIds = 1;
+}
+
+
+message CategoryResponse{
+  int32 id = 1;
+  string CategoryName = 2;
+  int32 CategorySort = 3;
+  int32 CategoryParentId = 4;
+}
+
+message CategoryListResponse{
+  repeated CategoryResponse CategoryList = 1;
+}
+
+service CategoryService {
+  rpc GetCategoryByIds(CategoryRequest) returns (CategoryListResponse);
+}

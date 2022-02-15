@@ -17,7 +17,7 @@ type (
 		Data  []ImageResponse `json:"data,omitempty"`
 	}
 	ImageResponse struct {
-		Id              int
+		Id              int    `json:"id"`
 		ImageUrl        string `json:"image_url,omitempty" `
 		ImageName       string `json:"image_name,omitempty" `
 		ImageUniqueName string `json:"image_unique_name,omitempty" `

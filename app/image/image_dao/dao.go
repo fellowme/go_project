@@ -14,6 +14,7 @@ type ImageDaoInterface interface {
 	CreateImageDao(image image_model.Image) error
 	GetImageByIdDao(id int) (image_param.ImageResponse, error)
 	DeleteImageByIdDao(id int) error
+	GetImageByIdsDao(ids []int) ([]image_param.ImageResponse, error)
 }
 
 type ImageDao struct {
@@ -76,5 +77,15 @@ func (d ImageDao) DeleteImageByIdDao(id int) error {
 		return err
 	}
 	return nil
+}
 
+func (d ImageDao) GetImageByIdsDao(ids []int) ([]image_param.ImageResponse, error) {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, image_const.ImageTableName)
+	defer cancel()
+	var data []image_param.ImageResponse
+	if err := tx.Where("id in (?) and is_delete = ?", ids, false).Find(&data).Error; err != nil && err != gorm.ErrRecordNotFound {
+		zap.L().Error("GetImageByIdsDao error", zap.Any("error", err), zap.Any("ids", ids))
+		return data, err
+	}
+	return data, nil
 }

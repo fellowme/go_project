@@ -1,1 +1,13 @@
 package product_const
+
+const (
+	ProductTableName      = "gin_product"
+	ProductMainTableName  = "gin_product_main"
+	StockTableName        = "gin_stock"
+	ProductImageTableName = "gin_product_image"
+)
+
+const (
+	CategoryIdEmptyTip = "类型id为空"
+	ImageIdEmptyTip    = "图片id为空"
+)
