@@ -1,6 +1,7 @@
 package product_control
 
 import (
+	"context"
 	gin_translator "github.com/fellowme/gin_common_library/translator"
 	gin_util "github.com/fellowme/gin_common_library/util"
 	"github.com/gin-gonic/gin"
@@ -27,10 +28,29 @@ func (receiver ProductControl) GetProductMainList(c *gin.Context) {
 		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
 		return
 	}
-	data, err := receiver.service.GetProductMainListServiceByParam(req)
+	ctx, ok := c.Get("tracerContext")
+	if !ok {
+		zap.L().Warn("GetProductMainList not get tracerContext")
+	}
+	data, err := receiver.service.GetProductMainListServiceByParam(ctx.(context.Context), req)
 	if err != nil {
 		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
 		return
 	}
-	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, nil, data, c)
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.SearchSuccessTip, data, c)
+}
+
+func (receiver ProductControl) PostProductMain(c *gin.Context) {
+	var req product_param.PostProductMainRequestParam
+	if err := c.ShouldBind(&req); err != nil {
+		zap.L().Error(" product PostProductMain error", zap.Any("error", err))
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
+		return
+	}
+	err := receiver.service.PostProductMainServiceByParam(req)
+	if err != nil {
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
+		return
+	}
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)
 }

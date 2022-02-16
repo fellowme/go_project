@@ -10,5 +10,6 @@ func InitRouter(api *gin.RouterGroup) {
 	control := product_control.GetProductControl()
 	{
 		productMainApi.GET("", control.GetProductMainList)
+		productMainApi.POST("", control.PostProductMain)
 	}
 }

@@ -10,4 +10,10 @@ const (
 const (
 	CategoryIdEmptyTip = "类型id为空"
 	ImageIdEmptyTip    = "图片id为空"
+	BrandIdEmptyTip    = "品牌id为空"
+	ShopIdEmptyTip     = "专柜id为空"
+)
+
+const (
+	ProductMainType = 1
 )
