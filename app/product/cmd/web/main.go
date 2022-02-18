@@ -27,7 +27,7 @@ func initRouter(app *gin.Engine) {
 */
 func initTable() {
 	err := gin_mysql.UseMysql(nil).AutoMigrate(&product_model.Product{}, &product_model.ProductMain{},
-		&product_model.ProductMain{}, &product_model.ProductImage{})
+		&product_model.ProductMain{}, &product_model.ProductImage{}, &product_model.Stock{})
 	if err != nil {
 		zap.L().Error("UseMysql error", zap.Any("error", err))
 	}

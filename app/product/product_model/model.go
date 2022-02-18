@@ -16,7 +16,7 @@ type ProductMain struct {
 	CategoryId        int                 `json:"category_id,omitempty" gorm:"type:int(11);comment:类别id"`
 	ProductCode       string              `json:"product_code,omitempty" gorm:"type:varchar(100);comment:商品码"`
 	ProductMainType   int                 `json:"product_main_type,omitempty" gorm:"type:int(11);DEFAULT:1;comment:商品类型 1商品"`
-	SaleTime          gin_model.LocalTime `json:"sale_time" gorm:"comment:开售时间"`
+	SaleTime          gin_model.LocalTime `json:"sale_time" gorm:"type:datetime;DEFAULT:NULL;comment:开售时间"`
 }
 
 func (receiver ProductMain) TableName() string {
@@ -42,8 +42,9 @@ func (receiver Product) TableName() string {
 
 type Stock struct {
 	gin_model.BaseMysqlStruct
-	ProductId   int `json:"product_id,omitempty" gorm:"type:int(11);comment:商品id"`
-	StockNumber int `json:"stock_number,omitempty" gorm:"type:int(9);comment:库存"`
+	ProductMainId int `json:"product_main_id,omitempty" gorm:"type:int(11);index:product_main_id;comment:product_main_id"`
+	ProductId     int `json:"product_id,omitempty" gorm:"type:int(11);index:product_id;comment:商品id"`
+	StockNumber   int `json:"stock_number,omitempty" gorm:"type:int(9);comment:库存"`
 }
 
 func (receiver Stock) TableName() string {

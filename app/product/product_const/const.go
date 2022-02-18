@@ -12,8 +12,10 @@ const (
 	ImageIdEmptyTip    = "图片id为空"
 	BrandIdEmptyTip    = "品牌id为空"
 	ShopIdEmptyTip     = "专柜id为空"
+	ParamEmptyTip      = "参数不能为空"
 )
 
 const (
 	ProductMainType = 1
+	ProductType     = 2
 )
