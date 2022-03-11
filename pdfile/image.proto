@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+option go_package = "./;rpc_service";
+
+package rpc_service;
+
+message ImageRequest{
+  string ImageIds = 1;
+}
+
+
+message ImageResponse{
+  int32 id = 1;
+  string ImageUrl = 2;
+  string ImageName = 3;
+  int32 ImageSort = 4;
+  int32 ImageType = 5;
+  string ImageSize = 6;
+}
+
+message ImageListResponse{
+  repeated ImageResponse imageList = 1;
+}
+
+service ImageService {
+  rpc GetImageByIds(ImageRequest) returns (ImageListResponse);
+}

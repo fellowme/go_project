@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "./;rpc_service";
+
+package rpc_service;
+
+message BrandRequest{
+  string BrandIds = 1;
+  bool IsImageUrl = 2;
+}
+
+
+message BrandResponse{
+  int32 id = 1;
+  string BrandName = 2;
+  int32 BrandImageId = 3;
+  int32 BrandWeight = 4;
+  int32 BrandStatus = 5;
+  string BrandImageUrl = 6;
+}
+
+message BrandListResponse{
+  repeated BrandResponse BrandList = 1;
+}
+
+service BrandService {
+  rpc GetBrandByIds(BrandRequest) returns (BrandListResponse);
+}

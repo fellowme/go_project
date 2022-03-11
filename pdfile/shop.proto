@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+option go_package = "./;rpc_service";
+
+package rpc_service;
+
+message ShopRequest{
+  string ShopIds = 1;
+  bool IsImageUrl = 2;
+}
+
+
+message ShopResponse{
+  int32 id = 1;
+  string ShopName = 2;
+  int32 ShopImageId = 3;
+  int32 ShopWeight = 4;
+  int32 ShopStatus = 5;
+  string ShopImageUrl = 6;
+}
+
+message ShopListResponse{
+  repeated ShopResponse ShopList = 1;
+}
+
+service ShopService {
+  rpc GetShopByIds(ShopRequest) returns (ShopListResponse);
+}
