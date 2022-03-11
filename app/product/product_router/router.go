@@ -14,6 +14,8 @@ func InitRouter(api *gin.RouterGroup) {
 		productMainApi.GET("/:id", control.GetProductMain)
 		productMainApi.PATCH("/:id", control.PatchProductMain)
 		productMainApi.DELETE("/:id", control.DeleteProductMain)
+		productMainApi.POST("/delete_all", control.PostDeleteProductMainAll)
+		productMainApi.POST("/to_mq", control.PostProductToMq)
 	}
 	productApi := api.Group("/product")
 	{
@@ -23,6 +25,7 @@ func InitRouter(api *gin.RouterGroup) {
 		productApi.PATCH("/:id", control.PatchProduct)
 		productApi.DELETE("/:id", control.DeleteProduct)
 		productApi.GET("/get_by_product_main_ids", control.GetProductByProductMainIds)
+		productApi.POST("/delete_by_product_ids", control.PostDeleteProductByIds)
 	}
 	stockApi := api.Group("/stock")
 	{

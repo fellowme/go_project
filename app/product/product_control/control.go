@@ -317,3 +317,48 @@ func (receiver ProductControl) GetProductByProductMainIds(c *gin.Context) {
 	}
 	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.SearchSuccessTip, data, c)
 }
+
+func (receiver ProductControl) PostDeleteProductMainAll(c *gin.Context) {
+	var req product_param.PostDeleteProductMainAllRequestParam
+	if err := c.ShouldBind(&req); err != nil {
+		zap.L().Error(" product PostDeleteProductMainAll error", zap.Any("error", err))
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
+		return
+	}
+	err := receiver.service.PostDeleteProductMainAllServiceByParam(req)
+	if err != nil {
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
+		return
+	}
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)
+}
+
+func (receiver ProductControl) PostDeleteProductByIds(c *gin.Context) {
+	var req product_param.DeletePostProductIdsRequestParam
+	if err := c.ShouldBind(&req); err != nil {
+		zap.L().Error(" product PostDeleteProductByIds error", zap.Any("error", err))
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
+		return
+	}
+	err := receiver.service.PostDeleteProductServiceByParam(req)
+	if err != nil {
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
+		return
+	}
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)
+}
+
+func (receiver ProductControl) PostProductToMq(c *gin.Context) {
+	var req product_param.PostProductIdsToMqRequestParam
+	if err := c.ShouldBind(&req); err != nil {
+		zap.L().Error(" product PostProductToMqByIds error", zap.Any("error", err))
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
+		return
+	}
+	messageId, err := receiver.service.PostProductMainToMqServiceByParam(req)
+	if err != nil {
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
+		return
+	}
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, messageId, c)
+}

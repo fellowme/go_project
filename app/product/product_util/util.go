@@ -1,6 +1,6 @@
-package product_service
+package product_util
 
-func getProductMainTypeNameByCode(code int) string {
+func GetProductMainTypeNameByCode(code int) string {
 	productMainTypeNameMap := map[int]string{
 		1: "正常商品",
 		2: "预售商品",
@@ -12,7 +12,7 @@ func getProductMainTypeNameByCode(code int) string {
 	return ""
 }
 
-func getProductMainStatusNameByCode(code int) string {
+func GetProductMainStatusNameByCode(code int) string {
 	productMainStatusNameMap := map[int]string{
 		-1: "下线",
 		1:  "上线",

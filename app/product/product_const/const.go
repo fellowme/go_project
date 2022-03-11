@@ -19,3 +19,12 @@ const (
 	ProductMainType = 1
 	ProductType     = 2
 )
+
+const (
+	ProductMainTopic        = "product-main-topic"
+	ProductMainConsumerName = "product_main_consumer"
+)
+
+const (
+	ProductMainIndex = "product_main_index_1.0"
+)

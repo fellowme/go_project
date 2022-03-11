@@ -7,8 +7,10 @@ import (
 	"go.uber.org/zap"
 	"go_project/app/product/product_const"
 	"go_project/app/product/product_dao"
+	"go_project/app/product/product_mq"
 	"go_project/app/product/product_param"
 	"go_project/app/product/product_remote_service/remote_rpc"
+	"go_project/app/product/product_util"
 	"strconv"
 	"strings"
 )
@@ -19,6 +21,8 @@ type ProductServiceInterface interface {
 	GetProductMainServiceById(ctx context.Context, id int) (product_param.ProductMainExtResponse, error)
 	PatchProductMainServiceByParam(param product_param.PostProductMainRequestParam) error
 	DeleteProductMainServiceById(id int) error
+	PostDeleteProductMainAllServiceByParam(param product_param.PostDeleteProductMainAllRequestParam) error
+	PostProductMainToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (string, error)
 
 	PostProductServiceByParam(param product_param.PostProductRequestParam) error
 	GetProductServiceByParam(ctx context.Context, param product_param.GetProductRequestParam) (product_param.ProductListResponse, error)
@@ -26,6 +30,7 @@ type ProductServiceInterface interface {
 	PatchProductServiceByParam(param product_param.PostProductRequestParam) error
 	DeleteProductServiceById(id int) error
 	GetProductByProductMainIdsServiceByParam(ctx context.Context, param product_param.PostProductIdsRequestParam) ([]product_param.ProductExtResponse, error)
+	PostDeleteProductServiceByParam(param product_param.DeletePostProductIdsRequestParam) error
 
 	GetProductStockListServiceByParam(param product_param.GetProductStockRequestParam) (product_param.ProductStockListResponse, error)
 	PostProductStockServiceByParam(param product_param.PostProductStockRequestParam) error
@@ -108,8 +113,8 @@ func (s ProductService) GetProductMainListServiceByParam(ctx context.Context, re
 		productMainExtInfo.Stock = stockMap[item.Id]
 		productMainExtInfo.SaleTimeString = item.SaleTime.String()
 		productMainExtInfo.CategoryName = categoryMap[item.CategoryId]
-		productMainExtInfo.ProductMainTypeName = getProductMainTypeNameByCode(item.ProductMainType)
-		productMainExtInfo.ProductMainStatusString = getProductMainStatusNameByCode(item.ProductMainStatus)
+		productMainExtInfo.ProductMainTypeName = product_util.GetProductMainTypeNameByCode(item.ProductMainType)
+		productMainExtInfo.ProductMainStatusString = product_util.GetProductMainStatusNameByCode(item.ProductMainStatus)
 		imageIdList := imageMapList[item.Id]
 		productMainExtInfo.Images = imageIdList
 		imageMapList := make([]product_param.ImageParam, 0)
@@ -215,9 +220,9 @@ func (s ProductService) GetProductMainServiceById(ctx context.Context, id int) (
 	return product_param.ProductMainExtResponse{
 		ProductMainResponse:     productMainInfo,
 		Stock:                   stock,
-		ProductMainStatusString: getProductMainStatusNameByCode(productMainInfo.ProductMainStatus),
+		ProductMainStatusString: product_util.GetProductMainStatusNameByCode(productMainInfo.ProductMainStatus),
 		SaleTimeString:          productMainInfo.SaleTime.String(),
-		ProductMainTypeName:     getProductMainTypeNameByCode(productMainInfo.ProductMainType),
+		ProductMainTypeName:     product_util.GetProductMainTypeNameByCode(productMainInfo.ProductMainType),
 		BrandName:               brandName,
 		CategoryName:            categoryName,
 		ShopName:                shopName,
@@ -680,4 +685,73 @@ func (s ProductService) GetProductByProductMainIdsServiceByParam(ctx context.Con
 		list = append(list, productExtResponse)
 	}
 	return list, nil
+}
+
+/*
+	PostDeleteProductMainAllServiceByParam  根据ids product_main_ids 删除product_main product product_image product_stock
+*/
+func (s ProductService) PostDeleteProductMainAllServiceByParam(param product_param.PostDeleteProductMainAllRequestParam) error {
+	idStringList := strings.Split(param.Ids, ",")
+	for _, idString := range idStringList {
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			zap.L().Error("PostDeleteProductMainAllServiceByParam Ids strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
+			continue
+		}
+		param.IdList = append(param.IdList, id)
+	}
+	err := s.dao.DeleteProductMainDaoByIds(param.IdList)
+	if err != nil {
+		return err
+	}
+	productInfos, _ := s.dao.QueryProductListDaoByProductMainIds(param.IdList)
+	if len(productInfos) != 0 {
+		productIdList := make([]int, 0)
+		for _, product := range productInfos {
+			productIdList = append(productIdList, product.Id)
+		}
+		_ = s.dao.DeleteProductImageByProductIds(productIdList)
+	}
+	_ = s.dao.DeleteProductImageByProductMainIds(param.IdList)
+	_ = s.dao.DeleteProductStockDaoByProductMainIds(param.IdList)
+	return nil
+}
+
+/*
+	PostDeleteProductServiceByParam  根据ids productIds 删除 product product_image product_stock
+*/
+func (s ProductService) PostDeleteProductServiceByParam(param product_param.DeletePostProductIdsRequestParam) error {
+	idStringList := strings.Split(param.Ids, ",")
+	for _, idString := range idStringList {
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			zap.L().Error("PostDeleteProductServiceByParam Ids strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
+			continue
+		}
+		param.IdList = append(param.IdList, id)
+	}
+	err := s.dao.DeleteProductDaoByIds(param.IdList)
+	if err != nil {
+		return err
+	}
+	_ = s.dao.DeleteProductImageByProductIds(param.IdList)
+	_ = s.dao.DeleteProductStockDaoByProductIds(param.IdList)
+	return nil
+}
+
+/*
+	PostProductMainToEsServiceByParam  根据product_main_ids 发送到es
+*/
+func (s ProductService) PostProductMainToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (string, error) {
+	idStringList := strings.Split(param.Ids, ",")
+	for _, idString := range idStringList {
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			zap.L().Error("PostProductMainToEsServiceByParam Ids strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
+			continue
+		}
+		param.IdList = append(param.IdList, id)
+	}
+	return product_mq.SendProductMainToMq(param.IdList)
+
 }

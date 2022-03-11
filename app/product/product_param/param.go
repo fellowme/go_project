@@ -28,6 +28,10 @@ type (
 		PostProductMainRequestParam
 		ImageIdList []int `gorm:"-"`
 	}
+	PostDeleteProductMainAllRequestParam struct {
+		Ids    string `json:"ids" form:"ids"`
+		IdList []int
+	}
 
 	// PostProductRequestParam sku 请求参数
 	PostProductRequestParam struct {
@@ -81,6 +85,14 @@ type (
 		Ids    string `json:"ids" form:"ids"`
 		IdList []int
 	}
+	DeletePostProductIdsRequestParam struct {
+		Ids    string `json:"ids" form:"ids"`
+		IdList []int
+	}
+	PostProductIdsToMqRequestParam struct {
+		Ids    string `json:"ids" form:"ids"`
+		IdList []int
+	}
 )
 
 type (
@@ -115,6 +127,20 @@ type (
 		List  []ProductMainExtResponse `json:"list,omitempty"`
 	}
 
+	ProductMainExtEsResponse struct {
+		ProductMainResponse
+		Stock                   int64           `json:"stock"`
+		ProductMainStatusString string          `json:"product_main_status_string"`
+		SaleTimeString          string          `json:"sale_time_string"`
+		ProductMainTypeName     string          `json:"product_main_type_name"`
+		BrandName               string          `json:"brand_name"`
+		CategoryName            string          `json:"category_name"`
+		ShopName                string          `json:"shop_name"`
+		Images                  []int           `json:"images"`
+		ImageMapList            []ImageParam    `json:"image_map_list"`
+		Product                 ProductResponse `json:"product"`
+	}
+
 	ProductResponse struct {
 		Id            int    `json:"id,omitempty"`
 		ProductMainId int    `json:"product_main_id,omitempty"`
@@ -129,9 +155,10 @@ type (
 	}
 	ProductExtResponse struct {
 		ProductResponse
-		Stock        int64        `json:"stock"`
-		Images       []int        `json:"images"`
-		ImageMapList []ImageParam `json:"image_map_list"`
+		ProductStatusString string       `json:"product_status_string"`
+		Stock               int64        `json:"stock"`
+		Images              []int        `json:"images"`
+		ImageMapList        []ImageParam `json:"image_map_list"`
 	}
 	ProductListResponse struct {
 		Total int64                `json:"total,omitempty"`

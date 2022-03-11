@@ -15,10 +15,13 @@ type ProductDaoInterface interface {
 	GetProductMainDaoById(id int) (product_param.ProductMainResponse, error)
 	PatchProductMainDaoByParam(param product_param.PostProductMainExtRequestParam) error
 	DeleteProductMainDaoById(id int) error
+	DeleteProductMainDaoByIds(ids []int) error
 	PostProductDaoByParam(param product_param.PostProductExtRequestParam) error
 	GetProductListDaoByParam(param product_param.GetProductRequestParam) (int64, []product_param.ProductResponse, error)
 	GetProductDaoById(id int) (product_param.ProductResponse, error)
 	QueryProductImageByProductMainIds(productMainIds []int) ([]product_param.ProductImageParam, error)
+	DeleteProductImageByProductMainIds(ids []int) error
+	DeleteProductImageByProductIds(ids []int) error
 	QueryProductImageByProductMainId(productMainId int) (product_param.ProductImageParam, error)
 	QueryProductImageByProductIds(productIds []int) ([]product_param.ProductImageParam, error)
 	QueryProductImageByProductId(productId int) (product_param.ProductImageParam, error)
@@ -28,16 +31,23 @@ type ProductDaoInterface interface {
 	QueryProductStockByProductIds(productIds []int) ([]product_param.ProductMainStockParam, error)
 	PatchProductDaoByParam(param product_param.PostProductExtRequestParam) error
 	DeleteProductDaoById(id int) error
+	DeleteProductDaoByIds(ids []int) error
+	DeleteProductDaoByProductMainIds(ids []int) error
 	GetProductStockListDaoByParam(param product_param.GetProductStockRequestParam) (int64, []product_param.ProductStockResponse, error)
 	QueryProductMainListDaoByIds(productMainIds []int) ([]product_param.ProductMainResponse, error)
+	QueryProductListDaoByProductMainIds(productMainIds []int) ([]product_param.ProductResponse, error)
 	QueryProductListDaoByIds(productIds []int) ([]product_param.ProductResponse, error)
 	PostProductStockDaoByParam(param product_param.PostProductStockRequestParam) error
 	PatchProductStockDaoByParam(param product_param.PostProductStockRequestParam) error
 	DeleteProductStockDaoById(id int) error
+	DeleteProductStockDaoByProductMainIds(ids []int) error
+	DeleteProductStockDaoByProductIds(ids []int) error
 	DeleteProductStockByIdDaoByParam(param product_param.PostProductStockByIdsRequestParam) error
 	GetProductStockByIdDaoByParam(param product_param.PostProductStockByIdsRequestParam) ([]product_param.ProductStockResponse, error)
 	QueryProductListDaoByParam(param product_param.PostProductIdsRequestParam) ([]product_param.ProductResponse, error)
+	QueryMainProductListDaoByProductMainIds(productMainIds []int) ([]product_param.ProductResponse, error)
 }
+
 type ProductDao struct {
 	dbMap map[string]*gorm.DB
 }
@@ -249,7 +259,7 @@ func (d ProductDao) QueryProductStockByProductMainId(productMainId int) (int64, 
 	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.StockTableName)
 	defer cancel()
 	var stockTotal int64
-	if err := tx.Select("SUM(stock_num) AS stock_total").Where("is_delete = ? and product_main_id = ? ", false, productMainId).Find(&stockTotal).Error; err != nil {
+	if err := tx.Select("SUM(stock_number) AS stock_total").Where("is_delete = ? and product_main_id = ? ", false, productMainId).Find(&stockTotal).Error; err != nil {
 		zap.L().Error("QueryProductStockByProductMainId find error", zap.Any("productMainId", productMainId), zap.Any("error", err))
 		return stockTotal, err
 	}
@@ -260,7 +270,7 @@ func (d ProductDao) QueryProductStockByProductMainIds(productMainIds []int) ([]p
 	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.StockTableName)
 	defer cancel()
 	var productMainStock []product_param.ProductMainStockParam
-	if err := tx.Select("product_main_id AS product_main_id, SUM(stock_num) AS stock_total").Where("is_delete = ? and product_main_id in (?)", false, productMainIds).Group("product_main_id").Find(&productMainStock).Error; err != nil {
+	if err := tx.Select("product_main_id AS product_main_id, SUM(stock_number) AS stock_total").Where("is_delete = ? and product_main_id in (?)", false, productMainIds).Group("product_main_id").Find(&productMainStock).Error; err != nil {
 		zap.L().Error("QueryProductStockByProductMainId find error", zap.Any("productMainIds", productMainIds), zap.Any("error", err))
 		return productMainStock, err
 	}
@@ -271,7 +281,7 @@ func (d ProductDao) QueryProductStockByProductId(productId int) (int64, error) {
 	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.StockTableName)
 	defer cancel()
 	var stockTotal int64
-	if err := tx.Select("SUM(stock_num) AS stock_total").Where("is_delete = ? and product_id = ? ", false, productId).Find(&stockTotal).Error; err != nil {
+	if err := tx.Select("SUM(stock_number) AS stock_total").Where("is_delete = ? and product_id = ? ", false, productId).Find(&stockTotal).Error; err != nil {
 		zap.L().Error("QueryProductStockByProductId find error", zap.Any("productMainId", productId), zap.Any("error", err))
 		return stockTotal, err
 	}
@@ -448,6 +458,98 @@ func (d ProductDao) QueryProductListDaoByParam(param product_param.PostProductId
 	var data []product_param.ProductResponse
 	if err := tx.Where("is_delete = ? ", false).Find(&data).Error; err != nil {
 		zap.L().Error("QueryProductListDaoByParam find error", zap.Any("param", param), zap.Any("error", err))
+		return data, err
+	}
+	return data, nil
+}
+
+func (d ProductDao) DeleteProductMainDaoByIds(ids []int) error {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.ProductMainTableName)
+	defer cancel()
+	if err := tx.Where("is_delete = ? AND id in (?)", false, ids).Delete(&product_model.ProductMain{}).Error; err != nil {
+		zap.L().Error("DeleteProductMainDaoByIds delete error", zap.Any("ids", ids), zap.Any("error", err))
+		return err
+	}
+	return nil
+}
+
+func (d ProductDao) DeleteProductDaoByProductMainIds(ids []int) error {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.ProductTableName)
+	defer cancel()
+	if err := tx.Where("is_delete = ? AND product_main_id in (?)", false, ids).Delete(&product_model.Product{}).Error; err != nil {
+		zap.L().Error("DeleteProductDaoByProductMainId delete error", zap.Any("ids", ids), zap.Any("error", err))
+		return err
+	}
+	return nil
+}
+
+func (d ProductDao) DeleteProductStockDaoByProductMainIds(ids []int) error {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.StockTableName)
+	defer cancel()
+	if err := tx.Where("is_delete = ? AND product_main_id in (?)", false, ids).Delete(&product_model.Stock{}).Error; err != nil {
+		zap.L().Error("DeleteProductStockDaoByProductMainId delete error", zap.Any("ids", ids), zap.Any("error", err))
+		return err
+	}
+	return nil
+}
+
+func (d ProductDao) DeleteProductImageByProductMainIds(ids []int) error {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.ProductImageTableName)
+	defer cancel()
+	if err := tx.Where("is_delete = ? AND product_id in (?) AND product_image_type = ? ", false, ids, product_const.ProductMainType).Delete(&product_model.ProductImage{}).Error; err != nil {
+		zap.L().Error("DeleteProductImageByProductMainId delete error", zap.Any("ids", ids), zap.Any("error", err))
+		return err
+	}
+	return nil
+}
+
+func (d ProductDao) DeleteProductImageByProductIds(ids []int) error {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.ProductImageTableName)
+	defer cancel()
+	if err := tx.Where("is_delete = ? AND product_id in (?) AND product_image_type = ? ", false, ids, product_const.ProductType).Delete(&product_model.ProductImage{}).Error; err != nil {
+		zap.L().Error("DeleteProductImageByProductId delete error", zap.Any("ids", ids), zap.Any("error", err))
+		return err
+	}
+	return nil
+}
+
+func (d ProductDao) QueryProductListDaoByProductMainIds(productMainIds []int) ([]product_param.ProductResponse, error) {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.ProductTableName)
+	defer cancel()
+	var data []product_param.ProductResponse
+	if err := tx.Where("is_delete = ? AND product_main_id in (?) ", false, productMainIds).Find(&data).Error; err != nil {
+		zap.L().Error("QueryProductListDaoByProductMainIds find error", zap.Any("productMainIds", productMainIds), zap.Any("error", err))
+		return data, err
+	}
+	return data, nil
+}
+
+func (d ProductDao) DeleteProductDaoByIds(ids []int) error {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.ProductTableName)
+	defer cancel()
+	if err := tx.Where("is_delete = ? AND id in (?) ", false, ids).Delete(&product_model.Product{}).Error; err != nil {
+		zap.L().Error("DeleteProductDaoByIds delete error", zap.Any("ids", ids), zap.Any("error", err))
+		return err
+	}
+	return nil
+}
+
+func (d ProductDao) DeleteProductStockDaoByProductIds(ids []int) error {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.StockTableName)
+	defer cancel()
+	if err := tx.Where("is_delete = ? AND product_id in (?)", false, ids).Delete(&product_model.Stock{}).Error; err != nil {
+		zap.L().Error("DeleteProductStockDaoByProductId delete error", zap.Any("ids", ids), zap.Any("error", err))
+		return err
+	}
+	return nil
+}
+
+func (d ProductDao) QueryMainProductListDaoByProductMainIds(productMainIds []int) ([]product_param.ProductResponse, error) {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, product_const.ProductTableName)
+	defer cancel()
+	var data []product_param.ProductResponse
+	if err := tx.Where("is_delete = ? AND product_main_id in (?) and is_main_product = ? ", false, productMainIds, true).Find(&data).Error; err != nil {
+		zap.L().Error("QueryMainProductListDaoByProductMainIds find error", zap.Any("productMainIds", productMainIds), zap.Any("error", err))
 		return data, err
 	}
 	return data, nil
