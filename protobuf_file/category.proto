@@ -2,7 +2,7 @@ syntax = "proto3";
 
 option go_package = "./;rpc_service";
 
-package rpc_service;
+package protobuf_file;
 
 message CategoryRequest{
   string CategoryIds = 1;

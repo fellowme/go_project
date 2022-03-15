@@ -22,7 +22,7 @@ type ProductServiceInterface interface {
 	PatchProductMainServiceByParam(param product_param.PostProductMainRequestParam) error
 	DeleteProductMainServiceById(id int) error
 	PostDeleteProductMainAllServiceByParam(param product_param.PostDeleteProductMainAllRequestParam) error
-	PostProductMainToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (string, error)
+	PostProductMainToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (int64, error)
 
 	PostProductServiceByParam(param product_param.PostProductRequestParam) error
 	GetProductServiceByParam(ctx context.Context, param product_param.GetProductRequestParam) (product_param.ProductListResponse, error)
@@ -742,7 +742,7 @@ func (s ProductService) PostDeleteProductServiceByParam(param product_param.Dele
 /*
 	PostProductMainToEsServiceByParam  根据product_main_ids 发送到es
 */
-func (s ProductService) PostProductMainToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (string, error) {
+func (s ProductService) PostProductMainToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (int64, error) {
 	idStringList := strings.Split(param.Ids, ",")
 	for _, idString := range idStringList {
 		id, err := strconv.Atoi(idString)

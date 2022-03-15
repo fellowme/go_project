@@ -7,12 +7,12 @@ import (
 	"go_project/app/product/product_const"
 )
 
-func SendProductMainToMq(ids []int) (string, error) {
+func SendProductMainToMq(ids []int) (int64, error) {
 	idsByte, _ := json.Marshal(ids)
 	messageId, err := gin_pulsar.SendPulsarMqMessage(pulsar.ProducerOptions{
 		Topic: product_const.ProductMainTopic,
 	}, pulsar.ProducerMessage{
 		Payload: idsByte,
 	})
-	return messageId, err
+	return messageId.LedgerID(), err
 }

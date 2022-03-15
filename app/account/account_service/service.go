@@ -3,11 +3,11 @@ package account_service
 import (
 	"context"
 	"errors"
-	"github.com/dgrijalva/jwt-go"
 	gin_const "github.com/fellowme/gin_common_library/const"
 	gin_jwt "github.com/fellowme/gin_common_library/jwt"
 	gin_model "github.com/fellowme/gin_common_library/model"
 	gin_util "github.com/fellowme/gin_common_library/util"
+	"github.com/golang-jwt/jwt"
 	"go_project/app/account/account_cache"
 	"go_project/app/account/account_const"
 	"go_project/app/account/account_dao"
@@ -112,7 +112,7 @@ func (receiver AccountService) PostVerificationCodeServiceByParam(ctx context.Co
 	ginJwt := gin_jwt.NewJwt()
 	token, _ := ginJwt.CreateJwtToken(gin_jwt.CustomClaims{
 		UserId: int(userInfo.Id),
-		StandardClaims: jwt.StandardClaims{
+		StandardClaims: &jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(gin_const.DefaultJwtExpiresAt).Unix(),
 		},
 	})

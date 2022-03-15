@@ -21,6 +21,11 @@ const (
 )
 
 const (
+	GoroutinePoolSize = 5
+	MaxBlockingTasks  = 20
+)
+
+const (
 	ProductMainTopic        = "product-main-topic"
 	ProductMainConsumerName = "product_main_consumer"
 )
