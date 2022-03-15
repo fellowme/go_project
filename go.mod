@@ -4,9 +4,9 @@ go 1.15
 
 require (
 	github.com/apache/pulsar-client-go v0.8.0
-	github.com/dgrijalva/jwt-go v3.2.0+incompatible
-	github.com/fellowme/gin_common_library v0.0.32
+	github.com/fellowme/gin_common_library v0.0.36
 	github.com/gin-gonic/gin v1.7.7
+	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gomodule/redigo v2.0.0+incompatible
 	github.com/olivere/elastic/v7 v7.0.29
 	github.com/pkg/errors v0.9.1
