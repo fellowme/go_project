@@ -121,7 +121,10 @@
         "type": "date",
         "format": "yyyy-MM-dd HH:mm:ss||yyyy-MM-dd||epoch_millis"
       },
-      "product_main_images": {
+      "images": {
+        "type": "integer"
+      },
+      "image_map_list": {
         "type": "nested",
         "properties": {
           "id": {

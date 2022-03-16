@@ -16,3 +16,13 @@ func SendProductMainToMq(ids []int) (int64, error) {
 	})
 	return messageId.LedgerID(), err
 }
+
+func SendProductToMq(ids []int) (int64, error) {
+	idsByte, _ := json.Marshal(ids)
+	messageId, err := gin_pulsar.SendPulsarMqMessage(pulsar.ProducerOptions{
+		Topic: product_const.ProductTopic,
+	}, pulsar.ProducerMessage{
+		Payload: idsByte,
+	})
+	return messageId.LedgerID(), err
+}

@@ -8,6 +8,7 @@ import (
 	"go.uber.org/zap"
 	"go_project/app/product/product_const"
 	"go_project/app/product/product_es"
+	"time"
 )
 
 func registerCustomerMq() {
@@ -18,6 +19,7 @@ func registerCustomerMq() {
 		ants.WithMaxBlockingTasks(product_const.MaxBlockingTasks), ants.WithNonblocking(true))
 	if err != nil {
 		zap.L().Error("registerCustomerMq NewPool error", zap.Any("error", err))
+		return
 	}
 	// 监听消息处理消息
 	go gin_pulsar.ReceivePulsarMqMessage(pulsar.ConsumerOptions{
@@ -25,13 +27,28 @@ func registerCustomerMq() {
 		SubscriptionName: product_const.ProductMainConsumerName,
 		Type:             1,
 	}, service.SendProductMainToEs, stopChan, pool)
+
+	go gin_pulsar.ReceivePulsarMqMessage(pulsar.ConsumerOptions{
+		Topic:            product_const.ProductTopic,
+		SubscriptionName: product_const.ProductConsumerName,
+		Type:             1,
+	}, service.SendProductToEs, stopChan, pool)
 	// 阻塞
 	select {
 	case pulsarError := <-stopChan:
-		//  释放 pool
-		pool.Release()
 		zap.L().Error("registerCustomerMq error", zap.Any("error", pulsarError))
 	}
+	//  协程池 执行的func 为0的状态 执行后续操作
+	for {
+		if pool.Running() == 0 {
+			break
+		}
+		time.Sleep(10 * time.Second)
+	}
+	//  释放 pool
+	pool.Release()
+	close(stopChan)
+
 }
 
 /*

@@ -348,14 +348,29 @@ func (receiver ProductControl) PostDeleteProductByIds(c *gin.Context) {
 	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)
 }
 
-func (receiver ProductControl) PostProductToMq(c *gin.Context) {
-	var req product_param.PostProductIdsToMqRequestParam
+func (receiver ProductControl) PostProductMainToMq(c *gin.Context) {
+	var req product_param.PostProductMainIdsToMqRequestParam
 	if err := c.ShouldBind(&req); err != nil {
-		zap.L().Error(" product PostProductToMqByIds error", zap.Any("error", err))
+		zap.L().Error(" product PostProductMainToMq error", zap.Any("error", err))
 		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
 		return
 	}
 	messageId, err := receiver.service.PostProductMainToMqServiceByParam(req)
+	if err != nil {
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
+		return
+	}
+	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, messageId, c)
+}
+
+func (receiver ProductControl) PostProductToMq(c *gin.Context) {
+	var req product_param.PostProductIdsToMqRequestParam
+	if err := c.ShouldBind(&req); err != nil {
+		zap.L().Error(" product PostProductToMq error", zap.Any("error", err))
+		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
+		return
+	}
+	messageId, err := receiver.service.PostProductToMqServiceByParam(req)
 	if err != nil {
 		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
 		return

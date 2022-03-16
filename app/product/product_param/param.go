@@ -89,6 +89,10 @@ type (
 		Ids    string `json:"ids" form:"ids"`
 		IdList []int
 	}
+	PostProductMainIdsToMqRequestParam struct {
+		Ids    string `json:"ids" form:"ids"`
+		IdList []int
+	}
 	PostProductIdsToMqRequestParam struct {
 		Ids    string `json:"ids" form:"ids"`
 		IdList []int

@@ -22,7 +22,7 @@ type ProductServiceInterface interface {
 	PatchProductMainServiceByParam(param product_param.PostProductMainRequestParam) error
 	DeleteProductMainServiceById(id int) error
 	PostDeleteProductMainAllServiceByParam(param product_param.PostDeleteProductMainAllRequestParam) error
-	PostProductMainToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (int64, error)
+	PostProductMainToMqServiceByParam(param product_param.PostProductMainIdsToMqRequestParam) (int64, error)
 
 	PostProductServiceByParam(param product_param.PostProductRequestParam) error
 	GetProductServiceByParam(ctx context.Context, param product_param.GetProductRequestParam) (product_param.ProductListResponse, error)
@@ -31,6 +31,7 @@ type ProductServiceInterface interface {
 	DeleteProductServiceById(id int) error
 	GetProductByProductMainIdsServiceByParam(ctx context.Context, param product_param.PostProductIdsRequestParam) ([]product_param.ProductExtResponse, error)
 	PostDeleteProductServiceByParam(param product_param.DeletePostProductIdsRequestParam) error
+	PostProductToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (int64, error)
 
 	GetProductStockListServiceByParam(param product_param.GetProductStockRequestParam) (product_param.ProductStockListResponse, error)
 	PostProductStockServiceByParam(param product_param.PostProductStockRequestParam) error
@@ -742,7 +743,7 @@ func (s ProductService) PostDeleteProductServiceByParam(param product_param.Dele
 /*
 	PostProductMainToEsServiceByParam  根据product_main_ids 发送到es
 */
-func (s ProductService) PostProductMainToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (int64, error) {
+func (s ProductService) PostProductMainToMqServiceByParam(param product_param.PostProductMainIdsToMqRequestParam) (int64, error) {
 	idStringList := strings.Split(param.Ids, ",")
 	for _, idString := range idStringList {
 		id, err := strconv.Atoi(idString)
@@ -753,5 +754,22 @@ func (s ProductService) PostProductMainToMqServiceByParam(param product_param.Po
 		param.IdList = append(param.IdList, id)
 	}
 	return product_mq.SendProductMainToMq(param.IdList)
+
+}
+
+/*
+	PostProductToMqServiceByParam  根据product_ids 发送到es
+*/
+func (s ProductService) PostProductToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (int64, error) {
+	idStringList := strings.Split(param.Ids, ",")
+	for _, idString := range idStringList {
+		id, err := strconv.Atoi(idString)
+		if err != nil {
+			zap.L().Error("PostProductToMqServiceByParam Ids strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
+			continue
+		}
+		param.IdList = append(param.IdList, id)
+	}
+	return product_mq.SendProductToMq(param.IdList)
 
 }

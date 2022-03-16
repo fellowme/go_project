@@ -48,7 +48,7 @@ func (p ProductEsService) SendProductMainToEs(message pulsar.Message) {
 			zap.L().Error("SendProductMain QueryMainProductListDaoByProductMainIds error", zap.Any("error", err), zap.Any("message", message))
 			return
 		}
-		if len(productMainInfoList) == 0 {
+		if len(productInfoList) == 0 {
 			zap.L().Error("SendProductMain QueryMainProductListDaoByProductMainIds empty", zap.Any("message", message))
 			return
 		}

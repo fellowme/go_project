@@ -27,9 +27,12 @@ const (
 
 const (
 	ProductMainTopic        = "product-main-topic"
+	ProductTopic            = "product-topic"
 	ProductMainConsumerName = "product_main_consumer"
+	ProductConsumerName     = "product_consumer"
 )
 
 const (
 	ProductMainIndex = "product_main_index_1.0"
+	ProductIndex     = "product_index_1.0"
 )
