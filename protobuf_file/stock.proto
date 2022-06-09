@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+option go_package = "./;rpc_service";
+
+package protobuf_file;
+
+message StockRequest{
+  string ProductIds = 1;
+  string ProductMainIds = 2;
+}
+
+
+message StockResponse{
+  int32 id = 1;
+  int32 ProductId = 2;
+  int32 ProductMainId = 3;
+  int32 TotalStock = 4;
+}
+
+
+message StockListResponse{
+  repeated StockResponse stockList = 1;
+}
+
+
+
+service StockService {
+  rpc GetStockByIds(StockRequest) returns (StockListResponse);
+
+}

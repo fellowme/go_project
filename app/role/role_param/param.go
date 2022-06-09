@@ -1,6 +1,8 @@
 package role_param
 
-import "github.com/fellowme/gin_common_library/param"
+import (
+	"github.com/fellowme/gin_common_library/param"
+)
 
 type (
 	GetRoleListRequestParam struct {
@@ -41,6 +43,10 @@ type (
 		RoleId int    `json:"role_id" form:"role_id" binding:"required"`
 		Method string `json:"method" form:"method" binding:"required"`
 	}
+	RebuildRoleMenuRequestParam struct {
+		RoleId int `json:"role_id" form:"role_id"`
+	}
+
 	PostRoleMenuMatchRequestParam struct {
 		Path   string `json:"path" form:"path" binding:"required"`
 		RoleId int    `json:"role_id" form:"role_id" binding:"required"`
@@ -91,5 +97,11 @@ type (
 	RoleMenuIdsParam struct {
 		RoleId  int    `json:"role_id"`
 		MenuIds string `json:"menu_ids"`
+	}
+	MenuResponseParam struct {
+		Id      int32  `json:"id,omitempty"`
+		Path    string `json:"Path,omitempty"`
+		Method  string `json:"Method,omitempty"`
+		IsRegex bool   `json:"is_regex"`
 	}
 )

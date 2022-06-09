@@ -1,0 +1,56 @@
+syntax = "proto3";
+
+option go_package = "./;rpc_service";
+
+package protobuf_file;
+
+message ProductRequest{
+  string ProductIds = 1;
+  string ProductMainIds = 2;
+}
+
+message ProductMainRequest{
+  string ProductIds = 1;
+  string ProductMainIds = 2;
+}
+
+message ProductResponse{
+  int64 id = 1;
+  string ShortTitle = 2;
+  string Title = 3;
+  int64 ProductMainId = 4;
+  int64 ProductStatus = 5;
+  bool IsMainProduct = 6;
+  string Price = 7;
+  string RealPrice = 8;
+  string Description = 9;
+  int64 Weight = 10;
+
+}
+
+message ProductMainResponse{
+  int32 id = 1;
+  string ShortTitle = 2;
+  string Title = 3;
+  int64 BrandId = 4;
+  int64 ShopId = 5;
+  int64 Weight = 6;
+  int64 ProductMainStatus = 7;
+  string ProductCode = 8;
+  int64 ProductMainType = 9;
+  string SaleTime = 10;
+}
+
+
+message ProductListResponse{
+  repeated ProductResponse productList = 1;
+}
+
+message ProductMainListResponse{
+  repeated ProductMainResponse productMainList = 1;
+}
+
+service ProductService {
+  rpc GetProductByIds(ProductRequest) returns (ProductListResponse);
+  rpc GetProductMainByIds(ProductMainRequest) returns (ProductMainListResponse);
+}

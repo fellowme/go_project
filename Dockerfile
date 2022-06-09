@@ -12,7 +12,7 @@ WORKDIR /go/release
 ADD . .
 
 # 编译: 把main.go编译为可执行的二进制文件, 并命名为app
-RUN GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build -t project:v1.0 -ldflags="-s -w" -installsuffix cgo -o app main.go
+RUN GOOS=linux CGO_ENABLED=0 GOARCH=amd64 go build -t project -ldflags="-s -w" -installsuffix cgo -o app main.go
 
 # 运行: 使用scratch作为基础镜像
 FROM scratch as prod

@@ -40,17 +40,6 @@ func (receiver Product) TableName() string {
 	return product_const.ProductTableName
 }
 
-type Stock struct {
-	gin_model.BaseMysqlStruct
-	ProductMainId int `json:"product_main_id,omitempty" gorm:"type:int(11);index:product_main_id;comment:product_main_id"`
-	ProductId     int `json:"product_id,omitempty" gorm:"type:int(11);index:product_id;comment:商品id"`
-	StockNumber   int `json:"stock_number,omitempty" gorm:"type:int(9);comment:库存"`
-}
-
-func (receiver Stock) TableName() string {
-	return product_const.StockTableName
-}
-
 type ProductImage struct {
 	gin_model.BaseMysqlStruct
 	ProductId        int `json:"product_id,omitempty" gorm:"type:int(11);comment:商品id "`

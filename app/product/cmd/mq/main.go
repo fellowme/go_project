@@ -22,13 +22,18 @@ func registerCustomerMq() {
 		return
 	}
 	// 监听消息处理消息
-	go gin_pulsar.ReceivePulsarMqMessage(pulsar.ConsumerOptions{
+	/*
+		处理 product_main  同步进入es
+	*/
+	go gin_pulsar.ReceivePulsarMqMixMessage(pulsar.ConsumerOptions{
 		Topic:            product_const.ProductMainTopic,
 		SubscriptionName: product_const.ProductMainConsumerName,
 		Type:             1,
 	}, service.SendProductMainToEs, stopChan, pool)
-
-	go gin_pulsar.ReceivePulsarMqMessage(pulsar.ConsumerOptions{
+	/*
+		处理 product  同步进入es
+	*/
+	go gin_pulsar.ReceivePulsarMqMixMessage(pulsar.ConsumerOptions{
 		Topic:            product_const.ProductTopic,
 		SubscriptionName: product_const.ProductConsumerName,
 		Type:             1,

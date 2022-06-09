@@ -35,11 +35,6 @@ func (p ProductEsService) SendProductToEs(message pulsar.Message) {
 		for _, item := range productInfoList {
 			productIdList = append(productIdList, item.Id)
 		}
-		stockMap := make(map[int]int64, 0)
-		stocks, _ := p.dao.QueryProductStockByProductIds(productIdList)
-		for _, stock := range stocks {
-			stockMap[stock.ProductId] = stock.StockTotal
-		}
 		ctx := context.Background()
 		imageMap := make(map[int]product_param.ImageParam, 0)
 		images, _ := p.dao.QueryProductImageByProductIds(productIdList)
@@ -81,7 +76,6 @@ func (p ProductEsService) SendProductToEs(message pulsar.Message) {
 				}
 			}
 			productExtResponse.ImageMapList = imageMapList
-			productExtResponse.Stock = stockMap[item.Id]
 			list = append(list, productExtResponse)
 		}
 		es := gin_es.GetElasticClient()

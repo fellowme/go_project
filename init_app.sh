@@ -2,7 +2,7 @@
 #this files directory 
 base_path=$(cd `dirname $0`; pwd)
 echo "current directory are: $base_path"
-app_mod="brand"
+app_mod="stock"
 
 cd $base_path"/app"
 

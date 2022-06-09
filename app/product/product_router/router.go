@@ -27,14 +27,4 @@ func InitRouter(api *gin.RouterGroup) {
 		productApi.GET("/get_by_product_main_ids", control.GetProductByProductMainIds)
 		productApi.POST("/delete_by_product_ids", control.PostDeleteProductByIds)
 	}
-	stockApi := api.Group("/stock")
-	{
-		stockApi.GET("", control.GetProductStockList)
-		stockApi.POST("", control.PostProductStock)
-		stockApi.PATCH("/:id", control.PatchProductStock)
-		stockApi.DELETE("/:id", control.DeleteProductStock)
-		stockApi.POST("/delete_by_id", control.DeleteProductStockById)
-		stockApi.GET("/get_by_id", control.GetProductStockById)
-	}
-
 }

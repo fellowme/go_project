@@ -32,13 +32,6 @@ type ProductServiceInterface interface {
 	GetProductByProductMainIdsServiceByParam(ctx context.Context, param product_param.PostProductIdsRequestParam) ([]product_param.ProductExtResponse, error)
 	PostDeleteProductServiceByParam(param product_param.DeletePostProductIdsRequestParam) error
 	PostProductToMqServiceByParam(param product_param.PostProductIdsToMqRequestParam) (int64, error)
-
-	GetProductStockListServiceByParam(param product_param.GetProductStockRequestParam) (product_param.ProductStockListResponse, error)
-	PostProductStockServiceByParam(param product_param.PostProductStockRequestParam) error
-	PatchProductStockServiceByParam(param product_param.PostProductStockRequestParam) error
-	DeleteProductStockServiceById(id int) error
-	DeleteProductStockByIdServiceById(param product_param.PostProductStockByIdsRequestParam) error
-	GetProductStockByIdServiceById(param product_param.PostProductStockByIdsRequestParam) ([]product_param.ProductStockResponse, error)
 }
 
 type ProductService struct {
@@ -72,12 +65,7 @@ func (s ProductService) GetProductMainListServiceByParam(ctx context.Context, re
 		shopIdList = append(shopIdList, item.ShopId)
 		productMainIdList = append(productMainIdList, item.Id)
 	}
-	stockMap := make(map[int]int64, 0)
 	images, _ := s.dao.QueryProductImageByProductIds(productMainIdList)
-	stocks, _ := s.dao.QueryProductStockByProductMainIds(productMainIdList)
-	for _, item := range stocks {
-		stockMap[item.ProductMainId] = item.StockTotal
-	}
 	imageMapList := make(map[int][]int, 0)
 	imageIdAllList := make([]int, 0)
 	for _, image := range images {
@@ -98,20 +86,23 @@ func (s ProductService) GetProductMainListServiceByParam(ctx context.Context, re
 	imageChanMap := make(chan map[int]product_param.ImageParam, 1)
 	shopChanMap := make(chan map[int]product_param.ShopParam, 1)
 	brandChanMap := make(chan map[int]product_param.BrandParam, 1)
+	stockChanMap := make(chan map[int]product_param.StockParam, 1)
 	go remote_rpc.GetCategoryListByCategoryIdsChannel(ctx, categoryIdList, categoryChanMap)
 	go remote_rpc.GetImageListByImageIdsChannel(ctx, imageIdAllList, imageChanMap)
 	go remote_rpc.GetShopListByShopIdsChannel(ctx, shopIdList, shopChanMap)
 	go remote_rpc.GetBrandListByBrandIdsChannel(ctx, brandIdList, brandChanMap)
+	go remote_rpc.GetStockListByProductIdsChannel(ctx, productMainIdList, stockChanMap)
 	categoryMap := <-categoryChanMap
 	imageMap := <-imageChanMap
 	shopMap := <-shopChanMap
 	brandMap := <-brandChanMap
+	stockMap := <-stockChanMap
 	list := make([]product_param.ProductMainExtResponse, 0)
 	for _, item := range data {
 		productMainExtInfo := product_param.ProductMainExtResponse{
 			ProductMainResponse: item,
 		}
-		productMainExtInfo.Stock = stockMap[item.Id]
+		productMainExtInfo.Stock = stockMap[item.Id].TotalStock
 		productMainExtInfo.SaleTimeString = item.SaleTime.String()
 		productMainExtInfo.CategoryName = categoryMap[item.CategoryId]
 		productMainExtInfo.ProductMainTypeName = product_util.GetProductMainTypeNameByCode(item.ProductMainType)
@@ -177,7 +168,6 @@ func (s ProductService) GetProductMainServiceById(ctx context.Context, id int) (
 	shopIdList := []int{productMainInfo.ShopId}
 
 	image, _ := s.dao.QueryProductImageByProductId(productMainInfo.Id)
-	stock, _ := s.dao.QueryProductStockByProductMainId(productMainInfo.Id)
 	imageIdList := make([]int, 0)
 	imageIdStringList := strings.Split(image.ImageIds, ",")
 	for _, imageIdString := range imageIdStringList {
@@ -192,14 +182,17 @@ func (s ProductService) GetProductMainServiceById(ctx context.Context, id int) (
 	imageChanMap := make(chan map[int]product_param.ImageParam, 1)
 	shopChanMap := make(chan map[int]product_param.ShopParam, 1)
 	brandChanMap := make(chan map[int]product_param.BrandParam, 1)
+	stockChanMap := make(chan map[int]product_param.StockParam, 1)
 	go remote_rpc.GetCategoryListByCategoryIdsChannel(ctx, categoryIdList, categoryChanMap)
 	go remote_rpc.GetImageListByImageIdsChannel(ctx, imageIdList, imageChanMap)
 	go remote_rpc.GetShopListByShopIdsChannel(ctx, shopIdList, shopChanMap)
 	go remote_rpc.GetBrandListByBrandIdsChannel(ctx, brandIdList, brandChanMap)
+	go remote_rpc.GetStockListByProductIdsChannel(ctx, []int{productMainInfo.Id}, stockChanMap)
 	categoryMap := <-categoryChanMap
 	imageMap := <-imageChanMap
 	shopMap := <-shopChanMap
 	brandMap := <-brandChanMap
+	stockMap := <-stockChanMap
 	categoryName := categoryMap[productMainInfo.CategoryId]
 	shop, ok := shopMap[productMainInfo.ShopId]
 	shopName := ""
@@ -211,6 +204,12 @@ func (s ProductService) GetProductMainServiceById(ctx context.Context, id int) (
 	if ok {
 		brandName = brand.BrandName
 	}
+
+	stock, ok := stockMap[productMainInfo.Id]
+	var stockTotal int32
+	if ok {
+		stockTotal = stock.TotalStock
+	}
 	imageMapList := make([]product_param.ImageParam, 0)
 	for _, imageId := range imageIdList {
 		data, ok := imageMap[imageId]
@@ -220,7 +219,7 @@ func (s ProductService) GetProductMainServiceById(ctx context.Context, id int) (
 	}
 	return product_param.ProductMainExtResponse{
 		ProductMainResponse:     productMainInfo,
-		Stock:                   stock,
+		Stock:                   stockTotal,
 		ProductMainStatusString: product_util.GetProductMainStatusNameByCode(productMainInfo.ProductMainStatus),
 		SaleTimeString:          productMainInfo.SaleTime.String(),
 		ProductMainTypeName:     product_util.GetProductMainTypeNameByCode(productMainInfo.ProductMainType),
@@ -298,16 +297,11 @@ func (s ProductService) GetProductServiceByParam(ctx context.Context, param prod
 	for _, item := range data {
 		productIdList = append(productIdList, item.Id)
 	}
-	stockMap := make(map[int]int64, 0)
-	stocks, _ := s.dao.QueryProductStockByProductIds(productIdList)
-	for _, stock := range stocks {
-		stockMap[stock.ProductId] = stock.StockTotal
-	}
 	imageMap := make(map[int]product_param.ImageParam, 0)
 	images, _ := s.dao.QueryProductImageByProductIds(productIdList)
 	imageMapList := make(map[int][]int, 0)
+	imageIdAllList := make([]int, 0)
 	if len(images) != 0 {
-		imageIdAllList := make([]int, 0)
 		for _, image := range images {
 			imageIdList := make([]int, 0)
 			imageIdStringList := strings.Split(image.ImageIds, ",")
@@ -323,10 +317,13 @@ func (s ProductService) GetProductServiceByParam(ctx context.Context, param prod
 			imageMapList[image.ProductId] = imageIdList
 		}
 
-		imageChanMap := make(chan map[int]product_param.ImageParam, 1)
-		go remote_rpc.GetImageListByImageIdsChannel(ctx, imageIdAllList, imageChanMap)
-		imageMap = <-imageChanMap
 	}
+	imageChanMap := make(chan map[int]product_param.ImageParam, 1)
+	stockChanMap := make(chan map[int]product_param.StockParam, 1)
+	go remote_rpc.GetImageListByImageIdsChannel(ctx, imageIdAllList, imageChanMap)
+	go remote_rpc.GetStockListByProductIdsChannel(ctx, productIdList, stockChanMap)
+	imageMap = <-imageChanMap
+	stockMap := <-stockChanMap
 	list := make([]product_param.ProductExtResponse, 0)
 	for _, item := range data {
 		productExtResponse := product_param.ProductExtResponse{
@@ -342,7 +339,7 @@ func (s ProductService) GetProductServiceByParam(ctx context.Context, param prod
 			}
 		}
 		productExtResponse.ImageMapList = imageMapList
-		productExtResponse.Stock = stockMap[item.Id]
+		productExtResponse.Stock = stockMap[item.Id].TotalStock
 		list = append(list, productExtResponse)
 	}
 	return product_param.ProductListResponse{
@@ -359,7 +356,6 @@ func (s ProductService) GetProductServiceById(ctx context.Context, id int) (prod
 	if err != nil {
 		return product_param.ProductExtResponse{}, err
 	}
-	stock, _ := s.dao.QueryProductStockByProductId(productInfo.Id)
 	imageParam, _ := s.dao.QueryProductImageByProductId(productInfo.Id)
 	imageIdStringList := strings.Split(imageParam.ImageIds, ",")
 	imageIdList := make([]int, 0)
@@ -372,8 +368,11 @@ func (s ProductService) GetProductServiceById(ctx context.Context, id int) (prod
 		imageIdList = append(imageIdList, imageId)
 	}
 	imageChanMap := make(chan map[int]product_param.ImageParam, 1)
+	stockChanMap := make(chan map[int]product_param.StockParam, 1)
 	go remote_rpc.GetImageListByImageIdsChannel(ctx, imageIdList, imageChanMap)
+	go remote_rpc.GetStockListByProductIdsChannel(ctx, []int{productInfo.Id}, stockChanMap)
 	imageMap := <-imageChanMap
+	stockMap := <-stockChanMap
 	productExtResponse := product_param.ProductExtResponse{
 		ProductResponse: productInfo,
 	}
@@ -386,7 +385,7 @@ func (s ProductService) GetProductServiceById(ctx context.Context, id int) (prod
 		}
 	}
 	productExtResponse.ImageMapList = imageMapList
-	productExtResponse.Stock = stock
+	productExtResponse.Stock = stockMap[productInfo.Id].TotalStock
 	return productExtResponse, nil
 }
 
@@ -417,188 +416,6 @@ func (s ProductService) PatchProductServiceByParam(param product_param.PostProdu
 */
 func (s ProductService) DeleteProductServiceById(id int) error {
 	return s.dao.DeleteProductDaoById(id)
-}
-
-/*
-	GetProductStockListServiceByParam  获取库存
-*/
-func (s ProductService) GetProductStockListServiceByParam(param product_param.GetProductStockRequestParam) (product_param.ProductStockListResponse, error) {
-	total, stockInfos, err := s.dao.GetProductStockListDaoByParam(param)
-	if err != nil {
-		return product_param.ProductStockListResponse{}, err
-	}
-	if total == 0 {
-		return product_param.ProductStockListResponse{}, errors.New(gin_util.NotFindTip)
-	}
-	productIdList := make([]int, 0)
-	productMainIdList := make([]int, 0)
-	for _, stock := range stockInfos {
-		productIdList = append(productIdList, stock.ProductId)
-		productMainIdList = append(productMainIdList, stock.ProductMainId)
-	}
-	productInfoMap := make(map[int]string, 0)
-	productMainInfoMap := make(map[int]string, 0)
-	productInfos, _ := s.dao.QueryProductListDaoByIds(productIdList)
-	productMainInfos, _ := s.dao.QueryProductMainListDaoByIds(productMainIdList)
-	for _, productInfo := range productInfos {
-		productInfoMap[productInfo.Id] = productInfo.Title
-	}
-	for _, productMainInfo := range productMainInfos {
-		productMainInfoMap[productMainInfo.Id] = productMainInfo.Title
-	}
-	list := make([]product_param.ProductStockResponse, 0)
-	for _, stock := range stockInfos {
-		list = append(list, product_param.ProductStockResponse{
-			Id:              stock.Id,
-			ProductMainId:   stock.ProductMainId,
-			ProductId:       stock.ProductId,
-			ProductName:     productInfoMap[stock.ProductId],
-			ProductMainName: productMainInfoMap[stock.ProductMainId],
-			StockNumber:     stock.StockNumber,
-		})
-	}
-	return product_param.ProductStockListResponse{
-		Total: total,
-		List:  list,
-	}, nil
-}
-
-/*
-	PostProductStockServiceByParam  新建库存
-*/
-func (s ProductService) PostProductStockServiceByParam(param product_param.PostProductStockRequestParam) error {
-	return s.dao.PostProductStockDaoByParam(param)
-}
-
-/*
-	PatchProductStockServiceByParam  更新库存
-*/
-func (s ProductService) PatchProductStockServiceByParam(param product_param.PostProductStockRequestParam) error {
-	return s.dao.PatchProductStockDaoByParam(param)
-}
-
-/*
-	DeleteProductStockServiceByParam  删除库存
-*/
-func (s ProductService) DeleteProductStockServiceById(id int) error {
-	return s.dao.DeleteProductStockDaoById(id)
-}
-
-/*
-	DeleteProductStockByIdServiceById  批量删除库存
-*/
-func (s ProductService) DeleteProductStockByIdServiceById(param product_param.PostProductStockByIdsRequestParam) error {
-	if param.Ids != "" {
-		idStringList := strings.Split(param.Ids, ",")
-		for _, idString := range idStringList {
-			id, err := strconv.Atoi(idString)
-			if err != nil {
-				zap.L().Error("DeleteProductStockByIdServiceById Ids strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
-				continue
-			}
-			param.IdList = append(param.IdList, id)
-		}
-	}
-	if param.ProductIds != "" {
-		idStringList := strings.Split(param.ProductIds, ",")
-		for _, idString := range idStringList {
-			id, err := strconv.Atoi(idString)
-			if err != nil {
-				zap.L().Error("DeleteProductStockByIdServiceById ProductIds strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
-				continue
-			}
-			param.ProductIdList = append(param.ProductIdList, id)
-		}
-	}
-	if param.ProductMainIds != "" {
-		idStringList := strings.Split(param.ProductMainIds, ",")
-		for _, idString := range idStringList {
-			id, err := strconv.Atoi(idString)
-			if err != nil {
-				zap.L().Error("DeleteProductStockByIdServiceById ProductMainIds strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
-				continue
-			}
-			param.ProductMainIdList = append(param.ProductMainIdList, id)
-		}
-	}
-	if len(param.IdList) == 0 && len(param.ProductIdList) == 0 && len(param.ProductMainIdList) == 0 {
-		return errors.New(product_const.ParamEmptyTip)
-	}
-	return s.dao.DeleteProductStockByIdDaoByParam(param)
-}
-
-/*
-	GetProductStockByIdServiceById  根据 id product_id  product_main_id 批量查询库存
-*/
-func (s ProductService) GetProductStockByIdServiceById(param product_param.PostProductStockByIdsRequestParam) ([]product_param.ProductStockResponse, error) {
-	if param.Ids != "" {
-		idStringList := strings.Split(param.Ids, ",")
-		for _, idString := range idStringList {
-			id, err := strconv.Atoi(idString)
-			if err != nil {
-				zap.L().Error("GetProductStockByIdServiceById Ids strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
-				continue
-			}
-			param.IdList = append(param.IdList, id)
-		}
-	}
-	if param.ProductIds != "" {
-		idStringList := strings.Split(param.ProductIds, ",")
-		for _, idString := range idStringList {
-			id, err := strconv.Atoi(idString)
-			if err != nil {
-				zap.L().Error("GetProductStockByIdServiceById ProductIds strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
-				continue
-			}
-			param.ProductIdList = append(param.ProductIdList, id)
-		}
-	}
-	if param.ProductMainIds != "" {
-		idStringList := strings.Split(param.ProductMainIds, ",")
-		for _, idString := range idStringList {
-			id, err := strconv.Atoi(idString)
-			if err != nil {
-				zap.L().Error("GetProductStockByIdServiceById ProductMainIds strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
-				continue
-			}
-			param.ProductMainIdList = append(param.ProductMainIdList, id)
-		}
-	}
-	if len(param.IdList) == 0 && len(param.ProductIdList) == 0 && len(param.ProductMainIdList) == 0 {
-		return nil, errors.New(product_const.ParamEmptyTip)
-	}
-	stockInfos, err := s.dao.GetProductStockByIdDaoByParam(param)
-	if err != nil {
-		return nil, err
-	}
-	productIdList := make([]int, 0)
-	productMainIdList := make([]int, 0)
-	for _, stock := range stockInfos {
-		productIdList = append(productIdList, stock.ProductId)
-		productMainIdList = append(productMainIdList, stock.ProductMainId)
-	}
-	productInfoMap := make(map[int]string, 0)
-	productMainInfoMap := make(map[int]string, 0)
-	productInfos, _ := s.dao.QueryProductListDaoByIds(productIdList)
-	productMainInfos, _ := s.dao.QueryProductMainListDaoByIds(productMainIdList)
-	for _, productInfo := range productInfos {
-		productInfoMap[productInfo.Id] = productInfo.Title
-	}
-	for _, productMainInfo := range productMainInfos {
-		productMainInfoMap[productMainInfo.Id] = productMainInfo.Title
-	}
-	list := make([]product_param.ProductStockResponse, 0)
-	for _, stock := range stockInfos {
-		list = append(list, product_param.ProductStockResponse{
-			Id:              stock.Id,
-			ProductMainId:   stock.ProductMainId,
-			ProductId:       stock.ProductId,
-			ProductName:     productInfoMap[stock.ProductId],
-			ProductMainName: productMainInfoMap[stock.ProductMainId],
-			StockNumber:     stock.StockNumber,
-		})
-	}
-	return list, nil
 }
 
 /*
@@ -638,16 +455,11 @@ func (s ProductService) GetProductByProductMainIdsServiceByParam(ctx context.Con
 	for _, item := range data {
 		productIdList = append(productIdList, item.Id)
 	}
-	stockMap := make(map[int]int64, 0)
-	stocks, _ := s.dao.QueryProductStockByProductIds(productIdList)
-	for _, stock := range stocks {
-		stockMap[stock.ProductId] = stock.StockTotal
-	}
 	imageMap := make(map[int]product_param.ImageParam, 0)
 	images, _ := s.dao.QueryProductImageByProductIds(productIdList)
 	imageMapList := make(map[int][]int, 0)
+	imageIdAllList := make([]int, 0)
 	if len(images) != 0 {
-		imageIdAllList := make([]int, 0)
 		for _, image := range images {
 			imageIdList := make([]int, 0)
 			imageIdStringList := strings.Split(image.ImageIds, ",")
@@ -662,11 +474,13 @@ func (s ProductService) GetProductByProductMainIdsServiceByParam(ctx context.Con
 			}
 			imageMapList[image.ProductId] = imageIdList
 		}
-
-		imageChanMap := make(chan map[int]product_param.ImageParam, 1)
-		go remote_rpc.GetImageListByImageIdsChannel(ctx, imageIdAllList, imageChanMap)
-		imageMap = <-imageChanMap
 	}
+	imageChanMap := make(chan map[int]product_param.ImageParam, 1)
+	stockChanMap := make(chan map[int]product_param.StockParam, 1)
+	go remote_rpc.GetImageListByImageIdsChannel(ctx, imageIdAllList, imageChanMap)
+	go remote_rpc.GetStockListByProductIdsChannel(ctx, productIdList, stockChanMap)
+	imageMap = <-imageChanMap
+	stockMap := <-stockChanMap
 	list := make([]product_param.ProductExtResponse, 0)
 	for _, item := range data {
 		productExtResponse := product_param.ProductExtResponse{
@@ -682,7 +496,7 @@ func (s ProductService) GetProductByProductMainIdsServiceByParam(ctx context.Con
 			}
 		}
 		productExtResponse.ImageMapList = imageMapList
-		productExtResponse.Stock = stockMap[item.Id]
+		productExtResponse.Stock = stockMap[item.Id].TotalStock
 		list = append(list, productExtResponse)
 	}
 	return list, nil
@@ -714,7 +528,6 @@ func (s ProductService) PostDeleteProductMainAllServiceByParam(param product_par
 		_ = s.dao.DeleteProductImageByProductIds(productIdList)
 	}
 	_ = s.dao.DeleteProductImageByProductMainIds(param.IdList)
-	_ = s.dao.DeleteProductStockDaoByProductMainIds(param.IdList)
 	return nil
 }
 
@@ -736,7 +549,6 @@ func (s ProductService) PostDeleteProductServiceByParam(param product_param.Dele
 		return err
 	}
 	_ = s.dao.DeleteProductImageByProductIds(param.IdList)
-	_ = s.dao.DeleteProductStockDaoByProductIds(param.IdList)
 	return nil
 }
 

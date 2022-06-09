@@ -20,7 +20,6 @@ func InitRouter(router *gin.RouterGroup) {
 		roleApi.POST("/menu", control.PostRoleMenu)
 		roleApi.DELETE("/menu/:id", control.DeleteRoleMenu)
 		roleApi.GET("/menu/rebuild", control.RebuildRoleMenu)
-		roleApi.POST("/menu/delete", control.DeleteRoleMenuMap)
 		roleApi.POST("/menu/match", control.RoleMenuMapMatch)
 	}
 }

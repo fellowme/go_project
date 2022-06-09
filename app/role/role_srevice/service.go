@@ -4,14 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	gin_rules_path "github.com/fellowme/gin_common_library/rules_path"
-	gin_util "github.com/fellowme/gin_common_library/util"
 	"go_project/app/role/role_cache"
 	"go_project/app/role/role_const"
+	"regexp"
+
+	gin_util "github.com/fellowme/gin_common_library/util"
 	"go_project/app/role/role_dao"
 	"go_project/app/role/role_param"
 	"go_project/app/role/role_remote_service/remote_rpc"
-	service "go_project/rpc_service"
 	"strconv"
 	"strings"
 )
@@ -27,9 +27,8 @@ type RoleServiceInterface interface {
 	GetRoleMenuService(ctx context.Context, param role_param.GetRoleMenuRequestParam) (role_param.RoleMenuListResponse, error)
 	PostRoleMenuService(ctx context.Context, param role_param.PostRoleMenuRequestParam) error
 	DeleteRoleMenuService(id int) error
-	RebuildRoleMenuService(ctx context.Context) error
-	DeleteRoleMenuMapService(ctx context.Context, param role_param.PostDeleteRoleMenuRequestParam) error
-	RoleMenuMapMatchService(ctx context.Context, param role_param.PostRoleMenuMatchRequestParam) error
+	RebuildRoleMenuService(ctx context.Context, param role_param.RebuildRoleMenuRequestParam) error
+	RoleMenuMapMatchService(param role_param.PostRoleMenuMatchRequestParam) error
 }
 
 type RoleService struct {
@@ -155,6 +154,7 @@ func (s RoleService) GetRoleMenuService(ctx context.Context, param role_param.Ge
 			roleMenuList[index].MenuName = ""
 			roleMenuList[index].Handler = ""
 			roleMenuList[index].Method = ""
+			continue
 		}
 		roleMenuList[index].Path = menuInfo.Path
 		roleMenuList[index].MenuName = menuInfo.MenuName
@@ -183,8 +183,8 @@ func (s RoleService) DeleteRoleMenuService(id int) error {
 
 }
 
-func (s RoleService) RebuildRoleMenuService(ctx context.Context) error {
-	roleMenuIds, err := s.dao.QueryRoleGroup(ctx)
+func (s RoleService) RebuildRoleMenuService(ctx context.Context, param role_param.RebuildRoleMenuRequestParam) error {
+	roleMenuIds, err := s.dao.QueryRoleGroup(ctx, param)
 	if err != nil {
 		return err
 	}
@@ -204,56 +204,67 @@ func (s RoleService) RebuildRoleMenuService(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	roleMenuMap := make(map[int][]*service.MenuResponse, 0)
+	roleMenuMap := make(map[int][]role_param.MenuResponseParam, 0)
 	for key, value := range roleMenuIdMap {
-		menuList := make([]*service.MenuResponse, 0)
+		menuList := make([]role_param.MenuResponseParam, 0)
 		for _, item := range value {
-			menuList = append(menuList, res[item])
+			menuInfo := res[item]
+			path := menuInfo.Path
+			newPath := ""
+			isRegex := false
+			if strings.Contains(path, ":") {
+				pathList := strings.Split(path, "/")
+				for _, item := range pathList {
+					if strings.HasPrefix(item, ":") {
+						item = "*"
+						isRegex = true
+					}
+					newPath += item + "/"
+				}
+			} else {
+				newPath = path
+			}
+
+			menuList = append(menuList, role_param.MenuResponseParam{
+				Id:      menuInfo.Id,
+				Path:    newPath,
+				Method:  menuInfo.Method,
+				IsRegex: isRegex,
+			})
 		}
 		roleMenuMap[key] = menuList
 	}
+	_ = role_cache.SetRoleMenuMapRedisKeyCache(roleMenuMap)
+	return nil
+}
 
-	newMap := gin_rules_path.InitPathMap()
-	for roleId, item := range roleMenuMap {
-		for _, menu := range item {
-			newMap.Put(strconv.Itoa(roleId), strings.ToLower(menu.Method), menu.Path)
+func (s RoleService) RoleMenuMapMatchService(param role_param.PostRoleMenuMatchRequestParam) error {
+	data, err := role_cache.GetRoleMenuMapRedisKeyCache(strconv.Itoa(param.RoleId))
+	if err != nil {
+		return err
+	}
+	var menuInfoList []role_param.MenuResponseParam
+	err = json.Unmarshal(data, &menuInfoList)
+	if err != nil {
+		return err
+	}
+	flag := false
+	for _, menuInfo := range menuInfoList {
+		if menuInfo.Method == param.Method {
+			if menuInfo.IsRegex {
+				reg := regexp.MustCompile(menuInfo.Path)
+				flag = reg.MatchString(param.Path)
+				if flag {
+					break
+				}
+			} else {
+				if menuInfo.Path == param.Path {
+					flag = true
+					break
+				}
+			}
 		}
 	}
-	data, _ := json.Marshal(newMap)
-	role_cache.SetRoleMenuMapRedisKeyCache("role", string(data))
-	return nil
-}
-
-func (s RoleService) DeleteRoleMenuMapService(ctx context.Context, param role_param.PostDeleteRoleMenuRequestParam) error {
-	data, err := role_cache.GetRoleMenuMapRedisKeyCache("role")
-	if err != nil {
-		return err
-	}
-	var roleMenu gin_rules_path.PathMap
-	err = json.Unmarshal(data, &roleMenu)
-	if err != nil {
-		return err
-	}
-	flag := roleMenu.Delete(strconv.Itoa(param.RoleId), param.Method, param.Path)
-	if !flag {
-		return errors.New(role_const.DeleteRoleMenuNotFindTip)
-	}
-	roleMapByte, _ := json.Marshal(roleMenu)
-	role_cache.SetRoleMenuMapRedisKeyCache("role", string(roleMapByte))
-	return nil
-}
-
-func (s RoleService) RoleMenuMapMatchService(ctx context.Context, param role_param.PostRoleMenuMatchRequestParam) error {
-	data, err := role_cache.GetRoleMenuMapRedisKeyCache("role")
-	if err != nil {
-		return err
-	}
-	var roleMenu gin_rules_path.PathMap
-	err = json.Unmarshal(data, &roleMenu)
-	if err != nil {
-		return err
-	}
-	flag := roleMenu.Get(strconv.Itoa(param.RoleId), param.Method+param.Path)
 	if !flag {
 		return errors.New(role_const.RoleMenuMapNotMatchTip)
 	}

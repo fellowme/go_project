@@ -56,25 +56,6 @@ type (
 		gin_param.PageRequestParam
 	}
 
-	GetProductStockRequestParam struct {
-		gin_param.PageRequestParam
-		ProductMainId int `json:"product_main_id,omitempty" form:"product_main_id,omitempty" `
-		ProductId     int `json:"product_id" form:"product_id,omitempty"`
-	}
-	PostProductStockRequestParam struct {
-		Id            int
-		ProductMainId int   `json:"product_main_id,omitempty" form:"product_main_id,omitempty" `
-		ProductId     int   `json:"product_id" form:"product_id,omitempty"`
-		StockNumber   int64 `json:"stock_number,omitempty" form:"stock_number"`
-	}
-	PostProductStockByIdsRequestParam struct {
-		Ids               string `json:"ids" form:"ids"`
-		IdList            []int
-		ProductMainIds    string `json:"product_main_ids,omitempty" form:"product_main_ids,omitempty" `
-		ProductMainIdList []int
-		ProductIds        string `json:"product_ids" form:"product_ids,omitempty"`
-		ProductIdList     []int
-	}
 	PostProductIdsRequestParam struct {
 		Ids               string `json:"ids" form:"ids"`
 		IdList            []int
@@ -115,7 +96,7 @@ type (
 	}
 	ProductMainExtResponse struct {
 		ProductMainResponse
-		Stock                   int64        `json:"stock"`
+		Stock                   int32        `json:"stock"`
 		ProductMainStatusString string       `json:"product_main_status_string"`
 		SaleTimeString          string       `json:"sale_time_string"`
 		ProductMainTypeName     string       `json:"product_main_type_name"`
@@ -160,26 +141,13 @@ type (
 	ProductExtResponse struct {
 		ProductResponse
 		ProductStatusString string       `json:"product_status_string"`
-		Stock               int64        `json:"stock"`
 		Images              []int        `json:"images"`
 		ImageMapList        []ImageParam `json:"image_map_list"`
+		Stock               int32        `json:"stock"`
 	}
 	ProductListResponse struct {
 		Total int64                `json:"total,omitempty"`
 		List  []ProductExtResponse `json:"list,omitempty"`
-	}
-
-	ProductStockResponse struct {
-		Id              int    `json:"id,omitempty"`
-		ProductMainId   int    `json:"product_main_id,omitempty"`
-		ProductId       int    `json:"product_id"`
-		ProductName     string `json:"product_name,omitempty"`
-		ProductMainName string `json:"product_main_name,omitempty"`
-		StockNumber     int64  `json:"stock_number,omitempty"`
-	}
-	ProductStockListResponse struct {
-		Total int64                  `json:"total,omitempty"`
-		List  []ProductStockResponse `json:"list,omitempty"`
 	}
 )
 
@@ -188,11 +156,7 @@ type (
 		ProductId int    `json:"product_id,omitempty"`
 		ImageIds  string `json:"image_ids"`
 	}
-	ProductMainStockParam struct {
-		ProductMainId int   `json:"product_main_id,omitempty"`
-		ProductId     int   `json:"product_id"`
-		StockTotal    int64 `json:"stock_total,omitempty"`
-	}
+
 	ImageParam struct {
 		Id        int    `json:"id"`
 		ImageUrl  string `json:"image_url,omitempty" `
@@ -205,5 +169,11 @@ type (
 	ShopParam struct {
 		Id       int
 		ShopName string
+	}
+	StockParam struct {
+		Id            int
+		TotalStock    int32
+		ProductId     int
+		ProductMainId int
 	}
 )
