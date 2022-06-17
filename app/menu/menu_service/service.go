@@ -1,13 +1,14 @@
 package menu_service
 
 import (
+	"context"
 	"go_project/app/menu/menu_dao"
 	"go_project/app/menu/menu_param"
 )
 
 type MenuServiceInterface interface {
 	PostMenuService(param menu_param.PostMenuRequestParam) error
-	GetMenuListService(param menu_param.GetMenuRequestParam) (menu_param.MenuListResponse, error)
+	GetMenuListService(ctx context.Context, param menu_param.GetMenuRequestParam) (menu_param.MenuListResponse, error)
 	PatchMenuService(param menu_param.PatchMenuRequestParam) error
 	DeleteMenuService(id int) error
 }
@@ -26,8 +27,9 @@ func (s MenuService) PostMenuService(param menu_param.PostMenuRequestParam) erro
 	return s.dao.PostMenuByParamDao(param)
 }
 
-func (s MenuService) GetMenuListService(param menu_param.GetMenuRequestParam) (menu_param.MenuListResponse, error) {
-	menuList, total, err := s.dao.GetMenuListByParamDao(param)
+func (s MenuService) GetMenuListService(ctx context.Context, param menu_param.GetMenuRequestParam) (menu_param.MenuListResponse, error) {
+	//panic("error")
+	menuList, total, err := s.dao.GetMenuListByParamDao(ctx, param)
 	return menu_param.MenuListResponse{
 		Total: total,
 		List:  menuList,

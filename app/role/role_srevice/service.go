@@ -134,7 +134,8 @@ func (s RoleService) GetRoleMenuService(ctx context.Context, param role_param.Ge
 		roleIdList = append(roleIdList, roleUser.RoleId)
 		menuIdList = append(menuIdList, roleUser.MenuId)
 	}
-	roleList, queryError := s.dao.QueryRoleByIdListDao(ctx, roleIdList)
+	roleIdSet := gin_util.RemoveRepetitionIntSlice(roleIdList)
+	roleList, queryError := s.dao.QueryRoleByIdListDao(ctx, roleIdSet)
 	if queryError != nil {
 		return roleMenuResponse, queryError
 	}

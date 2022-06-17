@@ -4,7 +4,7 @@ go 1.15
 
 require (
 	github.com/apache/pulsar-client-go v0.8.0
-	github.com/fellowme/gin_common_library v0.0.39
+	github.com/fellowme/gin_common_library v0.0.45
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gomodule/redigo v2.0.0+incompatible
@@ -14,7 +14,10 @@ require (
 	go.uber.org/zap v1.17.0
 	google.golang.org/grpc v1.40.0
 	google.golang.org/protobuf v1.27.1
-	gorm.io/gorm v1.22.4
+	gorm.io/gorm v1.23.5
 )
 
-replace github.com/spf13/viper v1.8.1 => github.com/spf13/viper v1.6.3
+replace (
+	github.com/gomodule/redigo v2.0.0+incompatible => github.com/gomodule/redigo v1.8.8
+	github.com/spf13/viper v1.8.1 => github.com/spf13/viper v1.6.3
+)

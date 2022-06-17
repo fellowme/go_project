@@ -13,7 +13,8 @@ const (
 	ShopIdEmptyTip        = "专柜id为空"
 	ProductIdEmptyTip     = "sku id empty"
 	ProductMainIdEmptyTip = "spu id empty"
-	ParamEmptyTip         = "参数不能为空"
+	ParamEmptyTip         = "param not empty"
+	MysqlFindErrorTip     = "mysql find error"
 )
 
 const (

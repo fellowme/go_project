@@ -133,12 +133,16 @@ func (receiver StockControl) PostToRedis(c *gin.Context) {
 	var req stock_param.PostStockTorRedisByIdsRequestParam
 	if err := c.ShouldBind(&req); err != nil {
 		zap.L().Error(" stock PostToRedis error", zap.Any("error", err))
-		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
+		gin_util.ReturnResponse(http.StatusBadRequest, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
 		return
 	}
-	errorList := receiver.service.PostStockToRedisByParam(req)
-	if errorList != nil {
-		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, errorList, nil, c)
+	ctx, ok := c.Get("tracerContext")
+	if !ok {
+		zap.L().Warn("role RebuildRoleMenu not get tracerContext")
+	}
+	errorList := receiver.service.PostStockToRedisByParam(ctx.(context.Context), req)
+	if len(errorList) != 0 {
+		gin_util.ReturnResponse(http.StatusBadRequest, gin_util.FailCode, errorList, nil, c)
 		return
 	}
 	gin_util.ReturnResponse(http.StatusOK, gin_util.SuccessCode, gin_util.ActionSuccessTip, nil, c)

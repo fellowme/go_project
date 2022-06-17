@@ -1,6 +1,7 @@
 package stock_dao
 
 import (
+	"context"
 	gin_mysql "github.com/fellowme/gin_common_library/mysql"
 	"go.uber.org/zap"
 	"go_project/app/stock/stock_const"
@@ -32,7 +33,7 @@ type StockDaoInterface interface {
 	DeleteStockDaoByProductIds(ids []int) error
 	DeleteStockDaoByParam(param stock_param.PostStockByIdsRequestParam) error
 	GetStockDaoByParam(param stock_param.PostStockByIdsRequestParam) ([]stock_param.StockResponse, error)
-	QueryStockToRedisDaoByParam(param stock_param.PostStockTorRedisByIdsRequestParam) ([]stock_param.StockResponse, error)
+	QueryStockToRedisDaoByParam(ctx context.Context, param stock_param.PostStockTorRedisByIdsRequestParam) ([]stock_param.StockParam, error)
 }
 
 func (d StockDao) QueryStockByProductMainId(productMainId int) (int64, error) {
@@ -186,8 +187,8 @@ func (d StockDao) DeleteStockDaoByProductIds(ids []int) error {
 	return nil
 }
 
-func (d StockDao) QueryStockToRedisDaoByParam(param stock_param.PostStockTorRedisByIdsRequestParam) ([]stock_param.StockResponse, error) {
-	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, stock_const.StockTableName)
+func (d StockDao) QueryStockToRedisDaoByParam(ctx context.Context, param stock_param.PostStockTorRedisByIdsRequestParam) ([]stock_param.StockParam, error) {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, ctx, stock_const.StockTableName)
 	defer cancel()
 	if len(param.ProductIdList) != 0 {
 		tx = tx.Where("product_id in (?)", param.ProductIdList)
@@ -195,7 +196,7 @@ func (d StockDao) QueryStockToRedisDaoByParam(param stock_param.PostStockTorRedi
 	if len(param.ProductMainIdList) != 0 {
 		tx = tx.Where("product_main_id in (?)", param.ProductMainIdList)
 	}
-	var data []stock_param.StockResponse
+	var data []stock_param.StockParam
 	if err := tx.Where("is_delete = ? ", false).Find(&data).Error; err != nil {
 		zap.L().Error("GetStockDaoByParam find error", zap.Any("param", param), zap.Any("error", err))
 		return data, err

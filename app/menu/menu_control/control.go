@@ -1,6 +1,7 @@
 package menu_control
 
 import (
+	"context"
 	gin_translator "github.com/fellowme/gin_common_library/translator"
 	gin_util "github.com/fellowme/gin_common_library/util"
 	"github.com/gin-gonic/gin"
@@ -43,7 +44,11 @@ func (receiver MenuControl) GetMenuList(c *gin.Context) {
 		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, gin_translator.GetErrorMessage(err), nil, c)
 		return
 	}
-	data, err := receiver.service.GetMenuListService(param)
+	ctx, ok := c.Get("tracerContext")
+	if !ok {
+		zap.L().Warn("GetMenuList not get tracerContext")
+	}
+	data, err := receiver.service.GetMenuListService(ctx.(context.Context), param)
 	if err != nil {
 		gin_util.ReturnResponse(http.StatusOK, gin_util.FailCode, err.Error(), nil, c)
 		return

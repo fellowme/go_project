@@ -158,7 +158,7 @@ func (d RoleDao) GetRoleMenuListByParamDao(param role_param.GetRoleMenuRequestPa
 		tx = tx.Where("role_id = ? ", param.RoleId)
 	}
 	if param.MenuId != 0 {
-		tx = tx.Where("user_id = ? ", param.MenuId)
+		tx = tx.Where("menu_id = ? ", param.MenuId)
 	}
 	var total int64
 	var roleMenuList []role_param.RoleMenuParam

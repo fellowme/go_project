@@ -31,7 +31,7 @@ func SetRoleMenuMapRedisKeyCache(roleMap map[int][]role_param.MenuResponseParam,
 		redisList = append(redisList, newKey)
 		redisList = append(redisList, string(jsonByte))
 	}
-	err := gin_redis.MSetKey(redisName, redisList)
+	err := gin_redis.MSetKey(nil, redisName, redisList)
 	if err != nil {
 		zap.L().Error("SetRoleMenuMapRedisKeyCache error", zap.Any("error", err),
 			zap.Any("roleMap", roleMap))
@@ -44,7 +44,7 @@ func GetRoleMenuMapRedisKeyCache(key string, name ...string) ([]byte, error) {
 	if len(name) != 0 {
 		redisName = name[0]
 	}
-	value, err := redis.Bytes(gin_redis.GetKey(redisName, getRoleMenuRedisKeyCacheFormat(key)))
+	value, err := redis.Bytes(gin_redis.GetKey(nil, redisName, getRoleMenuRedisKeyCacheFormat(key)))
 	if err != nil {
 		zap.L().Error("GetRoleMenuTireRedisKeyCache error", zap.Any("error", err), zap.Any("key", key),
 			zap.String("key", key), zap.Any("value", value))

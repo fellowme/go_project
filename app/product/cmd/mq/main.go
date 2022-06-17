@@ -3,6 +3,7 @@ package main
 import (
 	"github.com/apache/pulsar-client-go/pulsar"
 	gin_app "github.com/fellowme/gin_common_library/app"
+	grpc_consul "github.com/fellowme/gin_common_library/consul"
 	gin_pulsar "github.com/fellowme/gin_common_library/mq"
 	"github.com/panjf2000/ants/v2"
 	"go.uber.org/zap"
@@ -60,5 +61,10 @@ func registerCustomerMq() {
 	主程序
 */
 func main() {
-	gin_app.CreateAppMqServer("/app/product/product_config/", "go_product_mq", registerCustomerMq)
+	gin_app.CreateAppMqServer("/app/product/product_config/", "go_product_mq", registerCustomerMq, grpc_consul.ServiceConsul{
+		Name:     "go_product_mq",
+		Port:     28092,
+		Address:  "192.168.1.224",
+		IsSecure: false,
+	})
 }

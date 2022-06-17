@@ -51,6 +51,11 @@ type (
 		ProductId     int   `json:"product_id"`
 		StockTotal    int64 `json:"stock_total,omitempty"`
 	}
+	StockParam struct {
+		ProductMainId int   `json:"product_main_id,omitempty"`
+		ProductId     int   `json:"product_id"`
+		Stock         int64 `json:"stock,omitempty"`
+	}
 
 	ProductParam struct {
 		ProductMainId   int    `json:"product_main_id,omitempty"`

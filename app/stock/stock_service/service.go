@@ -32,7 +32,7 @@ type StockServiceInterface interface {
 	DeleteStockServiceById(id int) error
 	DeleteStockServiceByParam(param stock_param.PostStockByIdsRequestParam) error
 	GetStockServiceByParam(ctx context.Context, param stock_param.PostStockByIdsRequestParam) ([]stock_param.StockResponse, error)
-	PostStockToRedisByParam(param stock_param.PostStockTorRedisByIdsRequestParam) []error
+	PostStockToRedisByParam(ctx context.Context, param stock_param.PostStockTorRedisByIdsRequestParam) []string
 }
 
 /*
@@ -233,13 +233,13 @@ func (s StockService) GetStockServiceByParam(ctx context.Context, param stock_pa
 /*
 	PostStockToRedisByParam  根据 id product_id  product_main_id 批量将库存保存到redis
 */
-func (s StockService) PostStockToRedisByParam(param stock_param.PostStockTorRedisByIdsRequestParam) (list []error) {
+func (s StockService) PostStockToRedisByParam(ctx context.Context, param stock_param.PostStockTorRedisByIdsRequestParam) (list []string) {
 	if param.ProductIds != "" {
 		idStringList := strings.Split(param.ProductIds, ",")
 		for _, idString := range idStringList {
 			id, err := strconv.Atoi(idString)
 			if err != nil {
-				list = append(list, err)
+				list = append(list, err.Error())
 				zap.L().Error("PostStockToRedisByParam ProductIds strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
 				continue
 			}
@@ -251,7 +251,7 @@ func (s StockService) PostStockToRedisByParam(param stock_param.PostStockTorRedi
 		for _, idString := range idStringList {
 			id, err := strconv.Atoi(idString)
 			if err != nil {
-				list = append(list, err)
+				list = append(list, err.Error())
 				zap.L().Error("PostToRedisByParam ProductMainIds strconv.Atoi error", zap.Any("idString", idString), zap.Any("error", err))
 				continue
 			}
@@ -259,22 +259,20 @@ func (s StockService) PostStockToRedisByParam(param stock_param.PostStockTorRedi
 		}
 	}
 	if len(param.ProductIdList) == 0 && len(param.ProductMainIdList) == 0 {
-
-		return append(list, errors.New(product_const.ParamEmptyTip))
+		return append(list, product_const.ParamEmptyTip)
 	}
-	stockInfos, err := s.dao.QueryStockToRedisDaoByParam(param)
+	stockInfos, err := s.dao.QueryStockToRedisDaoByParam(ctx, param)
 	if err != nil {
-		return append(list, errors.New(product_const.ParamEmptyTip))
+		return append(list, product_const.MysqlFindErrorTip)
 	}
 	productStockMap := make(map[int]int64, 0)
 	for _, stockInfo := range stockInfos {
 		productStock, ok := productStockMap[stockInfo.ProductId]
 		if ok {
-			productStockMap[stockInfo.ProductId] = productStock + stockInfo.StockNumber
+			productStockMap[stockInfo.ProductId] = productStock + stockInfo.Stock
 		} else {
-			productStockMap[stockInfo.ProductId] = productStock
+			productStockMap[stockInfo.ProductId] = stockInfo.Stock
 		}
 	}
-
-	return stock_cache.SetProductStockToRedis(productStockMap)
+	return stock_cache.SetProductStockToRedis(ctx, productStockMap)
 }

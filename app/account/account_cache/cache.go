@@ -13,7 +13,7 @@ import (
 
 func getTodayLoginUserKeyCacheFormat(key string, flag bool) string {
 	if flag {
-		fmt.Sprintf(account_const.UserLoginFormatString, key, account_const.RedisKeyVersion)
+		return fmt.Sprintf(account_const.UserLoginFormatString, key, account_const.RedisKeyVersion)
 	}
 	return fmt.Sprintf(account_const.UserLoginOutFormatString, key, account_const.RedisKeyVersion)
 }
@@ -31,7 +31,7 @@ func GetPhoneRedisKeyCache(key string, name ...string) string {
 	if len(name) != 0 {
 		redisName = name[0]
 	}
-	code, err := redis.String(gin_redis.GetKeyByte(redisName, getPhoneCodeKeyCacheFormat(key)))
+	code, err := redis.String(gin_redis.GetKey(nil, redisName, getPhoneCodeKeyCacheFormat(key)))
 	if err != nil && err != redis.ErrNil {
 		zap.L().Error("GetRedisKeyCache error", zap.Any("error", err), zap.Any("key", key))
 		return ""
@@ -44,7 +44,7 @@ func DeletePhoneRedisKeyCache(key string, name ...string) error {
 	if len(name) != 0 {
 		redisName = name[0]
 	}
-	err := gin_redis.DeleteKey(redisName, getPhoneCodeKeyCacheFormat(key))
+	err := gin_redis.DeleteKey(nil, redisName, getPhoneCodeKeyCacheFormat(key))
 	if err != nil && err != redis.ErrNil {
 		zap.L().Error("DeletePhoneRedisKeyCache error", zap.Any("error", err), zap.Any("key", key))
 	}
@@ -56,7 +56,7 @@ func SetPhoneRedisKeyCache(key string, value string, name ...string) {
 	if len(name) != 0 {
 		redisName = name[0]
 	}
-	err := gin_redis.SetKeyValue(redisName, getPhoneCodeKeyCacheFormat(key), value,
+	err := gin_redis.SetKeyValue(nil, redisName, getPhoneCodeKeyCacheFormat(key), value,
 		account_const.VerificationCodeExpireKeyTimeSecond)
 	if err != nil {
 		zap.L().Error("SetPhoneRedisKeyCache error", zap.Any("error", err), zap.Any("key", getPhoneCodeKeyCacheFormat(key)),
@@ -70,7 +70,7 @@ func GetUserBitRedisKeyCache(key int, flag bool, name ...string) (int, error) {
 	if len(name) != 0 {
 		redisName = name[0]
 	}
-	data, err := gin_redis.GetBitmapKey(redisName, getTodayLoginUserKeyCacheFormat(gin_util.NowTimeToString(), flag), key)
+	data, err := gin_redis.GetBitmapKey(nil, redisName, getTodayLoginUserKeyCacheFormat(gin_util.NowTimeToString(), flag), key)
 	if err != nil {
 		zap.L().Error("GetUserBitRedisKeyCache error", zap.Any("error", err), zap.Any("key", key))
 		return data, err
@@ -83,7 +83,7 @@ func SetUserBitRedisKeyCache(key, value int, flag bool, name ...string) error {
 	if len(name) != 0 {
 		redisName = name[0]
 	}
-	err := gin_redis.SetBitmapKey(redisName, getTodayLoginUserKeyCacheFormat(gin_util.NowTimeToString(), flag), key, value)
+	err := gin_redis.SetBitmapKey(nil, redisName, getTodayLoginUserKeyCacheFormat(gin_util.NowTimeToString(), flag), key, value)
 	if err != nil {
 		zap.L().Error("SetUserBitRedisKeyCache error", zap.Any("error", err), zap.Any("key", key), zap.Any("value", value))
 
@@ -97,7 +97,7 @@ func GetUserRedisKeyCache(key int32, name ...string) (account_param.SessionUserP
 		redisName = name[0]
 	}
 	var data account_param.SessionUserParam
-	dataByte, err := redis.Bytes(gin_redis.GetKeyByte(redisName, getSessionKeyCacheFormat(key)))
+	dataByte, err := redis.Bytes(gin_redis.GetKey(nil, redisName, getSessionKeyCacheFormat(key)))
 	if err != nil {
 		zap.L().Error("GetUserRedisKeyCache error", zap.Any("error", err), zap.Any("key", key))
 		return data, err
@@ -115,7 +115,7 @@ func SetUserRedisKeyCache(key int32, value interface{}, name ...string) error {
 		redisName = name[0]
 	}
 	valueByte, _ := json.Marshal(value)
-	err := gin_redis.SetKeyValue(redisName, getSessionKeyCacheFormat(key), string(valueByte),
+	err := gin_redis.SetKeyValue(nil, redisName, getSessionKeyCacheFormat(key), string(valueByte),
 		account_const.SessionExpireKeyTimeSecond)
 	if err != nil {
 		zap.L().Error("SetUserRedisKeyCache error", zap.Any("error", err), zap.Any("key", key),
@@ -130,7 +130,7 @@ func DeleteUserRedisKeyCache(key int32, name ...string) error {
 	if len(name) != 0 {
 		redisName = name[0]
 	}
-	err := gin_redis.DeleteKey(redisName, getSessionKeyCacheFormat(key))
+	err := gin_redis.DeleteKey(nil, redisName, getSessionKeyCacheFormat(key))
 	if err != nil && err != redis.ErrNil {
 		zap.L().Error("DeleteUserRedisKeyCache error", zap.Any("error", err), zap.Any("key", key))
 	}

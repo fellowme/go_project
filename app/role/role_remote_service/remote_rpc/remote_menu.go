@@ -27,7 +27,7 @@ func GetMenuList(ctx context.Context, menuIdList []int) (map[int]*service.MenuRe
 	clientDeadline := time.Now().Add(10 * time.Second)
 	contextDeadline, cancel := context.WithDeadline(ctx, clientDeadline)
 	defer cancel()
-	conn := gin_grpc.GetGRPCConnect(contextDeadline, "127.0.0.1:18085")
+	conn := gin_grpc.GetGRPCConnect(contextDeadline, "go_menu_rpc")
 	defer gin_grpc.CloseGRPCConnect(conn)
 	serviceClient := service.NewMenuServiceClient(conn)
 	resp, err := serviceClient.GetMenuByIds(contextDeadline, &service.MenuRequest{

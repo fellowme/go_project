@@ -1,6 +1,7 @@
 package menu_dao
 
 import (
+	"context"
 	gin_mysql "github.com/fellowme/gin_common_library/mysql"
 	"go.uber.org/zap"
 	"go_project/app/menu/menu_const"
@@ -11,7 +12,7 @@ import (
 
 type MenuDaoInterface interface {
 	PostMenuByParamDao(param menu_param.PostMenuRequestParam) error
-	GetMenuListByParamDao(param menu_param.GetMenuRequestParam) ([]menu_param.MenuResponse, int64, error)
+	GetMenuListByParamDao(ctx context.Context, param menu_param.GetMenuRequestParam) ([]menu_param.MenuResponse, int64, error)
 	PatchMenuByParamDao(param menu_param.PatchMenuRequestParam) error
 	DeleteMenuByIdDao(id int) error
 	GetMenuListByIdsDao(idList []int) ([]menu_param.MenuResponse, error)
@@ -37,8 +38,8 @@ func (d MenuDao) PostMenuByParamDao(param menu_param.PostMenuRequestParam) error
 	return nil
 }
 
-func (d MenuDao) GetMenuListByParamDao(param menu_param.GetMenuRequestParam) ([]menu_param.MenuResponse, int64, error) {
-	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, nil, menu_const.MenuTableName)
+func (d MenuDao) GetMenuListByParamDao(ctx context.Context, param menu_param.GetMenuRequestParam) ([]menu_param.MenuResponse, int64, error) {
+	tx, cancel := gin_mysql.GetTxWithContext(d.dbMap, ctx, menu_const.MenuTableName)
 	defer cancel()
 	var total int64
 	var menuList []menu_param.MenuResponse
